@@ -683,176 +683,6 @@
     </div>
 
     <script>
-        function initializeEventListeners() {
-            try {
-                console.log('initializeEventListeners running');
-                // Register form handler
-                const regFormEl = document.getElementById('registerForm');
-                if (regFormEl) {
-                    regFormEl.addEventListener('submit', (e) => {
-                        e.preventDefault();
-
-                        userData = {
-                            emri: document.getElementById('emri').value,
-                            gjinia: document.getElementById('gjinia').value,
-                            mosha: parseInt(document.getElementById('mosha').value),
-                            pesha: parseFloat(document.getElementById('pesha').value),
-                            lartesia: parseFloat(document.getElementById('lartesia').value)
-                        };
-
-                        // Simulate user registration (no backend needed for demo)
-                        currentUserId = 'user_' + Date.now();
-
-                        // Update current page and save to localStorage
-                        currentPage = 'survey';
-                        saveAppState('survey');
-
-                        showAlert('Regjistrimi u përfundua me sukses!', 'success');
-                        
-                        // Page transition with overlay fade
-                        const overlay = document.getElementById('pageTransitionOverlay');
-                        const registerSection = document.getElementById('registerSection');
-                        const surveySection = document.getElementById('surveySection');
-                        
-                        // Fade to black (like splash screen)
-                        overlay.classList.add('active');
-                        
-                        setTimeout(() => {
-                            // Switch pages while faded
-                            registerSection.classList.add('hidden');
-                            surveySection.classList.remove('hidden');
-                            
-                            // Fade from black
-                            setTimeout(() => {
-                                overlay.classList.remove('active');
-                                
-                                // Focus first field after transition
-                                setTimeout(() => {
-                                    const firstSurveyField = document.getElementById('shkoje_palester');
-                                    if (firstSurveyField) firstSurveyField.focus();
-                                }, 200);
-                            }, 100);
-                        }, 500);
-                        
-                        document.getElementById('registerForm').reset();
-                    });
-                } else {
-                    console.warn('registerForm element not found');
-                }
-
-                // Show/hide level selection based on gym attendance
-                const shkoEl = document.getElementById('shkoje_palester');
-                if (shkoEl) {
-                    shkoEl.addEventListener('change', (e) => {
-                        const nivelGroup = document.getElementById('nivelGroup');
-                        if (e.target.value === 'true') {
-                            nivelGroup.style.display = 'block';
-                            document.getElementById('niveli_fitnesit').required = true;
-                        } else {
-                            nivelGroup.style.display = 'none';
-                            document.getElementById('niveli_fitnesit').required = false;
-                        }
-                    });
-                } else {
-                    console.warn('shkoje_palester element not found');
-                }
-
-                // Survey form handler
-                const surveyFormEl = document.getElementById('surveyForm');
-                if (surveyFormEl) {
-                    surveyFormEl.addEventListener('submit', (e) => {
-                        e.preventDefault();
-
-                        surveyData = {
-                            shkoje_palester: document.getElementById('shkoje_palester').value === 'true',
-                            niveli_fitnesit: document.getElementById('niveli_fitnesit').value || 'fillestar',
-                            objektivi: document.getElementById('objektivi').value,
-                            aktiviteti_ditore: document.getElementById('aktiviteti_ditore').value
-                        };
-
-                        // Save to localStorage
-                        saveAppState('results');
-
-                        showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
-                        
-                        // Page transition with overlay fade
-                        const overlay = document.getElementById('pageTransitionOverlay');
-                        const surveySection = document.getElementById('surveySection');
-                        
-                        // Fade to black (like splash screen)
-                        overlay.classList.add('active');
-                        
-                        setTimeout(() => {
-                            // Switch pages while faded
-                            surveySection.classList.add('hidden');
-                            displayResults(surveyData);
-                            
-                            // Fade from black
-                            setTimeout(() => {
-                                overlay.classList.remove('active');
-                            }, 100);
-                        }, 500);
-                    });
-                } else {
-                    console.warn('surveyForm element not found');
-                }
-
-                // Log progress handler
-                const logFormEl = document.getElementById('logProgressForm');
-                if (logFormEl) {
-                    logFormEl.addEventListener('submit', (e) => {
-                        e.preventDefault();
-
-                        const progressData = {
-                            emri_ushtrimit: document.getElementById('exercise_name').value,
-                            setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
-                            repetisione_perfunduar: document.getElementById('reps_completed').value,
-                            pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
-                            shenime: document.getElementById('notes').value,
-                            data: new Date().toISOString()
-                        };
-
-                        progressHistory.push(progressData);
-
-                        // Save to localStorage
-                        saveAppState('results');
-
-                        showAlert('Përparimi u regjistrua me sukses!', 'success');
-                        document.getElementById('logProgressForm').reset();
-                        displayProgress();
-                    });
-                } else {
-                    console.warn('logProgressForm element not found');
-                }
-
-                // Tab switching
-                document.querySelectorAll('.tab-button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const tab = button.dataset.tab;
-                        currentPage = tab;
-
-                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                        button.classList.add('active');
-                        const newTab = document.getElementById(tab);
-                        if (newTab) {
-                            newTab.classList.add('active');
-                        }
-
-                        saveAppState(tab);
-
-                        if (tab === 'progress') {
-                            displayProgress();
-                        }
-                    });
-                });
-            } catch (err) {
-                console.error('initializeEventListeners error:', err);
-                showAlert('Gabim gjatë inicializimit: ' + (err.message || err), 'error');
-            }
-        }
-
         // State management
         let currentUserId = null;
         let currentPage = 'nutrition';
@@ -1067,6 +897,11 @@
 
         // Display results
         function displayResults(surveyData) {
+            const registerSection = document.getElementById('registerSection');
+            const surveySection = document.getElementById('surveySection');
+            if (registerSection) registerSection.classList.add('hidden');
+            if (surveySection) surveySection.classList.add('hidden');
+
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.add('show');
 
@@ -1248,6 +1083,28 @@
             document.getElementById('modalProgressForm').reset();
         }
 
+        function runPageTransition(fromSection, toSection, onAfter) {
+            const overlay = document.getElementById('pageTransitionOverlay');
+            const switchPages = () => {
+                if (fromSection) fromSection.classList.add('hidden');
+                if (toSection) toSection.classList.remove('hidden');
+                if (typeof onAfter === 'function') onAfter();
+            };
+
+            if (!overlay) {
+                switchPages();
+                return;
+            }
+
+            overlay.classList.add('active');
+            setTimeout(() => {
+                switchPages();
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 150);
+            }, 500);
+        }
+
         // Initialize event listeners
         function initializeEventListeners() {
             try {
@@ -1268,27 +1125,12 @@
                     
                     showAlert('✓ Regjistrimi u përfundua me sukses!', 'success');
 
-                    const overlay = document.getElementById('pageTransitionOverlay');
                     const registerSection = document.getElementById('registerSection');
                     const surveySection = document.getElementById('surveySection');
-
-                    if (overlay && registerSection && surveySection) {
-                        overlay.classList.add('active');
-                        setTimeout(() => {
-                            registerSection.classList.add('hidden');
-                            surveySection.classList.remove('hidden');
-                            setTimeout(() => {
-                                overlay.classList.remove('active');
-                                const field = document.getElementById('shkoje_palester');
-                                if (field) field.focus();
-                            }, 100);
-                        }, 500);
-                    } else {
-                        if (registerSection) registerSection.classList.add('hidden');
-                        if (surveySection) surveySection.classList.remove('hidden');
+                    runPageTransition(registerSection, surveySection, () => {
                         const field = document.getElementById('shkoje_palester');
                         if (field) field.focus();
-                    }
+                    });
 
                     document.getElementById('registerForm').reset();
                 });
@@ -1317,22 +1159,11 @@
                     saveAppState('results');
                     showAlert('✓ Pyetësori u përfundua!', 'success');
 
-                    const overlay = document.getElementById('pageTransitionOverlay');
                     const surveySection = document.getElementById('surveySection');
-
-                    if (overlay && surveySection) {
-                        overlay.classList.add('active');
-                        setTimeout(() => {
-                            surveySection.classList.add('hidden');
-                            displayResults(surveyData);
-                            setTimeout(() => {
-                                overlay.classList.remove('active');
-                            }, 100);
-                        }, 500);
-                    } else {
-                        if (surveySection) surveySection.classList.add('hidden');
+                    runPageTransition(surveySection, null, () => {
                         displayResults(surveyData);
-                    }
+                        window.scrollTo(0, 0);
+                    });
                 });
 
                 // Progress form
