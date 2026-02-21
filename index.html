@@ -198,13 +198,29 @@
 
         .form-section {
             display: block;
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.6s ease;
         }
 
         .form-section.hidden {
             display: none;
+        }
+
+        /* Fade overlay for transitions */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 9999;
+        }
+
+        .page-transition-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .form-section h2 {
@@ -287,6 +303,8 @@
 
         .results {
             display: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         .results.show {
@@ -626,6 +644,9 @@
         <div class="splash-text">Fitness App</div>
     </div>
 
+    <!-- Page Transition Overlay -->
+    <div id="pageTransitionOverlay" class="page-transition-overlay"></div>
+
     <div class="container">
         <div class="header">
             <div class="header-logo">
@@ -856,18 +877,30 @@
 
                         showAlert('Regjistrimi u përfundua me sukses!', 'success');
                         
-                        // Simple page transition
+                        // Page transition with overlay fade
+                        const overlay = document.getElementById('pageTransitionOverlay');
                         const registerSection = document.getElementById('registerSection');
                         const surveySection = document.getElementById('surveySection');
                         
-                        registerSection.classList.add('hidden');
-                        surveySection.classList.remove('hidden');
+                        // Fade to black (like splash screen)
+                        overlay.classList.add('active');
                         
-                        // Focus first field
                         setTimeout(() => {
-                            const firstSurveyField = document.getElementById('shkoje_palester');
-                            if (firstSurveyField) firstSurveyField.focus();
-                        }, 100);
+                            // Switch pages while faded
+                            registerSection.classList.add('hidden');
+                            surveySection.classList.remove('hidden');
+                            
+                            // Fade from black
+                            setTimeout(() => {
+                                overlay.classList.remove('active');
+                                
+                                // Focus first field after transition
+                                setTimeout(() => {
+                                    const firstSurveyField = document.getElementById('shkoje_palester');
+                                    if (firstSurveyField) firstSurveyField.focus();
+                                }, 200);
+                            }, 100);
+                        }, 500);
                         
                         document.getElementById('registerForm').reset();
                     });
@@ -910,10 +943,23 @@
 
                         showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
                         
-                        // Simple transition
+                        // Page transition with overlay fade
+                        const overlay = document.getElementById('pageTransitionOverlay');
                         const surveySection = document.getElementById('surveySection');
-                        surveySection.classList.add('hidden');
-                        displayResults(surveyData);
+                        
+                        // Fade to black (like splash screen)
+                        overlay.classList.add('active');
+                        
+                        setTimeout(() => {
+                            // Switch pages while faded
+                            surveySection.classList.add('hidden');
+                            displayResults(surveyData);
+                            
+                            // Fade from black
+                            setTimeout(() => {
+                                overlay.classList.remove('active');
+                            }, 100);
+                        }, 500);
                     });
                 } else {
                     console.warn('surveyForm element not found');
@@ -1189,7 +1235,6 @@
 
         // Display results
         function displayResults(surveyData) {
-            document.getElementById('surveySection').classList.add('hidden');
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.add('show');
 
