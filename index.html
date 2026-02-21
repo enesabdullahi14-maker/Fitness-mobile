@@ -200,25 +200,11 @@
             display: block;
             opacity: 1;
             transform: translateY(0);
-            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.6s ease;
         }
 
         .form-section.hidden {
-            opacity: 0 !important;
-            transform: translateY(30px) !important;
-            pointer-events: none;
-            position: absolute;
-            visibility: hidden;
-        }
-
-        .form-section.fade-out {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-
-        .form-section.fade-in {
-            opacity: 1;
-            transform: translateY(0);
+            display: none;
         }
 
         .form-section h2 {
@@ -870,33 +856,18 @@
 
                         showAlert('Regjistrimi u përfundua me sukses!', 'success');
                         
-                        // Transition with CSS classes
+                        // Simple page transition
                         const registerSection = document.getElementById('registerSection');
                         const surveySection = document.getElementById('surveySection');
                         
-                        // Fade out register section
-                        registerSection.classList.add('fade-out');
+                        registerSection.classList.add('hidden');
+                        surveySection.classList.remove('hidden');
                         
+                        // Focus first field
                         setTimeout(() => {
-                            registerSection.classList.add('hidden');
-                            registerSection.classList.remove('fade-out');
-                            
-                            // Show and fade in survey section
-                            surveySection.classList.remove('hidden');
-                            surveySection.style.opacity = '0';
-                            surveySection.style.transform = 'translateY(20px)';
-                            
-                            setTimeout(() => {
-                                surveySection.style.opacity = '1';
-                                surveySection.style.transform = 'translateY(0)';
-                                
-                                // Focus first field
-                                setTimeout(() => {
-                                    const firstSurveyField = document.getElementById('shkoje_palester');
-                                    if (firstSurveyField) firstSurveyField.focus();
-                                }, 100);
-                            }, 50);
-                        }, 800);
+                            const firstSurveyField = document.getElementById('shkoje_palester');
+                            if (firstSurveyField) firstSurveyField.focus();
+                        }, 100);
                         
                         document.getElementById('registerForm').reset();
                     });
@@ -939,23 +910,10 @@
 
                         showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
                         
-                        // Transition to results
+                        // Simple transition
                         const surveySection = document.getElementById('surveySection');
-                        surveySection.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-                        
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                surveySection.style.opacity = '0';
-                                surveySection.style.transform = 'translateY(-30px)';
-                            });
-                        });
-                        
-                        setTimeout(() => {
-                            surveySection.classList.add('hidden');
-                            surveySection.style.opacity = '1';
-                            surveySection.style.transform = 'translateY(0)';
-                            displayResults(surveyData);
-                        }, 800);
+                        surveySection.classList.add('hidden');
+                        displayResults(surveyData);
                     });
                 } else {
                     console.warn('surveyForm element not found');
@@ -993,45 +951,22 @@
                 document.querySelectorAll('.tab-button').forEach(button => {
                     button.addEventListener('click', () => {
                         const tab = button.dataset.tab;
-                        currentPage = tab; // Update current page
+                        currentPage = tab;
 
-                        // Fade out current tab
-                        const currentActiveTab = document.querySelector('.tab-content.active');
-                        if (currentActiveTab) {
-                            currentActiveTab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                            requestAnimationFrame(() => {
-                                currentActiveTab.style.opacity = '0';
-                                currentActiveTab.style.transform = 'translateX(-20px)';
-                            });
+                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                        button.classList.add('active');
+                        const newTab = document.getElementById(tab);
+                        if (newTab) {
+                            newTab.classList.add('active');
                         }
 
-                        setTimeout(() => {
-                            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                            document.querySelectorAll('.tab-content').forEach(c => {
-                                c.classList.remove('active');
-                                c.style.opacity = '0';
-                                c.style.transform = 'translateX(20px)';
-                            });
+                        saveAppState(tab);
 
-                            button.classList.add('active');
-                            const newTab = document.getElementById(tab);
-                            if (newTab) {
-                                newTab.classList.add('active');
-                                newTab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                                
-                                requestAnimationFrame(() => {
-                                    newTab.style.opacity = '1';
-                                    newTab.style.transform = 'translateX(0)';
-                                });
-                            }
-
-                            // Save tab state
-                            saveAppState(tab);
-
-                            if (tab === 'progress') {
-                                displayProgress();
-                            }
-                        }, 300);
+                        if (tab === 'progress') {
+                            displayProgress();
+                        }
                     });
                 });
             } catch (err) {
@@ -1257,18 +1192,6 @@
             document.getElementById('surveySection').classList.add('hidden');
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.add('show');
-            
-            // Add transition effect
-            resultsSection.style.opacity = '0';
-            resultsSection.style.transform = 'translateY(30px)';
-            resultsSection.style.transition = 'opacity 1s ease, transform 1s ease';
-            
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    resultsSection.style.opacity = '1';
-                    resultsSection.style.transform = 'translateY(0)';
-                });
-            });
 
             const nutrition = calculateNutrition(
                 userData.mosha, userData.pesha, userData.lartesia,
