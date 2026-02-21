@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikacioni i Fitnesit</title>
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="FitnessApp">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        #jsStatus {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        #jsStatus.ok {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        #jsStatus.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .form-section {
+            display: block;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            width: auto;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+            transform: none;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nutrition-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-top: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nutrition-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nutrition-card .label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .nutrition-detail {
+            background: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nutrition-detail h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .nutrition-detail p {
+            color: #333;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .nutrition-detail ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .nutrition-detail ul li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 5px 0 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .workout-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .workout-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .muscle-group-title {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-left: 4px solid #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .exercise-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .exercise-info {
+            padding: 15px;
+        }
+
+        .exercise-info h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .exercise-info p {
+            font-size: 0.85em;
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .exercise-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .exercise-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .header .reset-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.18);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .header .reset-btn:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateY(-2px);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            width: auto;
+            padding: 0;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item strong {
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💪 Aplikacioni i Fitnesit</h1>
+            <p>Plani juaj i personalizuar për fitness dhe nutricion</p>
+            <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">Rifresko Profilin</button>
+        </div>
+
+        <div id="jsStatus"></div>
+
+        <div class="content">
+            <!-- REGISTRATION SECTION -->
+            <div class="form-section" id="registerSection">
+                <h2>📝 Regjistrimi</h2>
+                <form id="registerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Emri</label>
+                            <input type="text" id="emri" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fjalëkalimi</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gjinia</label>
+                            <select id="gjinia" required>
+                                <option value="">Zgjidh...</option>
+                                <option value="mashkull">Mashkull</option>
+                                <option value="femer">Femër</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mosha</label>
+                            <input type="number" id="mosha" min="15" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pesha (kg)</label>
+                            <input type="number" id="pesha" step="0.1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lartësia (cm)</label>
+                        <input type="number" id="lartesia" step="0.1" required>
+                    </div>
+
+                    <button type="submit">Regjistrohu</button>
+                </form>
+            </div>
+
+            <!-- SURVEY SECTION -->
+            <div class="form-section" id="surveySection" style="display: none;">
+                <h2>📋 Pyetësori</h2>
+                <form id="surveyForm">
+                    <div class="form-group">
+                        <label>A shkoni në palestër?</label>
+                        <select id="shkoje_palester" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="true">Po</option>
+                            <option value="false">Jo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="nivelGroup" style="display: none;">
+                        <label>Cili është niveli juaj i fitnesit?</label>
+                        <select id="niveli_fitnesit">
+                            <option value="">Zgjidh...</option>
+                            <option value="fillestar">Fillestar</option>
+                            <option value="mesatar">Mesatar</option>
+                            <option value="avancuar">Avancuar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cili është qëllimi juaj?</label>
+                        <select id="objektivi" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="bulk">Bulk (Shtim i peshës)</option>
+                            <option value="cut">Cut (Humbje e peshës)</option>
+                            <option value="maintain">Maintain (Ruajtje e peshës)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Aktiviteti ditor</label>
+                        <select id="aktiviteti_ditore" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="i_ulte">I ulte (Sedimented në zyrë)</option>
+                            <option value="lehtesisht_aktiv">Lehtësisht aktiv</option>
+                            <option value="moderatisht_aktiv">Moderatisht aktiv</option>
+                            <option value="shumë_aktiv">Shumë aktiv</option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Përfundoni Pyetësorin</button>
+                </form>
+            </div>
+
+            <!-- RESULTS SECTION -->
+            <div class="results" id="resultsSection">
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="nutrition">🥗 Nutricion</button>
+                    <button class="tab-button" data-tab="workouts">💪 Ushtrimet</button>
+                    <button class="tab-button" data-tab="progress">📊 Përparimi</button>
+                </div>
+
+                <div class="tab-content active" id="nutrition">
+                    <h3>Rekomandimet për Nutricion</h3>
+                    <div id="nutritionResults"></div>
+                </div>
+
+                <div class="tab-content" id="workouts">
+                    <h3>Programi Juaj i Stërvitjes</h3>
+                    <div id="workoutResults"></div>
+                </div>
+
+                <div class="tab-content" id="progress">
+                    <h3>Përparimi</h3>
+                    <form id="logProgressForm" style="margin-bottom: 20px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Emri i ushtrimit</label>
+                                <input type="text" id="exercise_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Setje të Perfunduara</label>
+                                <input type="number" id="sets_completed" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Përsëritje</label>
+                                <input type="text" id="reps_completed" placeholder="p.sh. 10" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Pesha (kg)</label>
+                                <input type="number" id="weight_lifted" step="0.5" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Shënime</label>
+                            <input type="text" id="notes" placeholder="Si u ndihesit?">
+                        </div>
+                        <button type="submit">Regjistro Progresin</button>
+                    </form>
+                    <div id="progressResults"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div class="exercise-modal" id="exerciseModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeExerciseModal()">&times;</button>
+            <img id="modalImage" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;">
+            <h2 id="modalExerciseName"></h2>
+            <p id="modalExerciseDesc" style="color: #666; margin: 10px 0 20px 0;"></p>
+            
+            <div class="nutrition-detail">
+                <p><strong>Përsëritje të Rekomanduara:</strong> <span id="modalRecommendedReps"></span></p>
+                <p><strong>Setje të Rekomanduara:</strong> <span id="modalRecommendedSets"></span></p>
+            </div>
+
+            <div class="nutrition-detail" id="previousWorkout" style="display: none; background: #f0f0f0;">
+                <h4 style="margin-top: 0;">Sesia e Fundit:</h4>
+                <p><strong>Setje:</strong> <span id="previousSets">-</span></p>
+                <p><strong>Përsëritje:</strong> <span id="previousReps">-</span></p>
+                <p><strong>Pesha:</strong> <span id="previousWeight">-</span> kg</p>
+                <p style="font-size: 0.9em; color: #666;"></p>
+            </div>
+
+            <form id="modalProgressForm" style="margin-top: 20px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Setje të Perfunduara</label>
+                        <input type="number" id="modalSetsCompleted" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Përsëritje</label>
+                        <input type="text" id="modalRepsCompleted" placeholder="p.sh. 10" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Pesha (kg)</label>
+                        <input type="number" id="modalWeightLifted" step="0.5" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Shënime</label>
+                        <input type="text" id="modalNotes" placeholder="Si u ndihesit?">
+                    </div>
+                </div>
+                <button type="submit" style="width: 100%;">Ruaj Progresin</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function initializeEventListeners() {
+            try {
+                console.log('initializeEventListeners running');
+                // Register form handler
+                const regFormEl = document.getElementById('registerForm');
+                if (regFormEl) {
+                    regFormEl.addEventListener('submit', (e) => {
+                        e.preventDefault();
+
+                        userData = {
+                            emri: document.getElementById('emri').value,
+                            email: document.getElementById('email').value,
+                            password: document.getElementById('password').value,
+                            gjinia: document.getElementById('gjinia').value,
+                            mosha: parseInt(document.getElementById('mosha').value),
+                            pesha: parseFloat(document.getElementById('pesha').value),
+                            lartesia: parseFloat(document.getElementById('lartesia').value)
+                        };
+
+                        // Simulate user registration (no backend needed for demo)
+                        currentUserId = 'user_' + Date.now();
+
+                        // Update current page and save to localStorage
+                        currentPage = 'survey';
+                        saveAppState('survey');
+
+                        showAlert('Regjistrimi u përfundua me sukses!', 'success');
+                        document.getElementById('registerSection').style.display = 'none';
+                        document.getElementById('surveySection').style.display = 'block';
+                        document.getElementById('registerForm').reset();
+
+                        // Focus first field in survey for better UX
+                        const firstSurveyField = document.getElementById('shkoje_palester');
+                        if (firstSurveyField) firstSurveyField.focus();
+                    });
+                } else {
+                    console.warn('registerForm element not found');
+                    window.addEventListener('DOMContentLoaded', () => {
+                        loadAppState();
+                        initializeEventListeners();
+
+                        // Register service worker for PWA
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('service-worker.js')
+                              .then(() => console.log('Service worker registered'))
+                              .catch((err) => console.warn('SW register failed:', err));
+                        }
+                    });
+                if (shkoEl) {
+                    shkoEl.addEventListener('change', (e) => {
+                        const nivelGroup = document.getElementById('nivelGroup');
+                        if (e.target.value === 'true') {
+                            nivelGroup.style.display = 'block';
+                            document.getElementById('niveli_fitnesit').required = true;
+                        } else {
+                            nivelGroup.style.display = 'none';
+                            document.getElementById('niveli_fitnesit').required = false;
+                        }
+                    });
+                } else {
+                    console.warn('shkoje_palester element not found');
+                }
+
+                // Survey form handler
+                const surveyFormEl = document.getElementById('surveyForm');
+                if (surveyFormEl) {
+                    surveyFormEl.addEventListener('submit', (e) => {
+                        e.preventDefault();
+
+                        surveyData = {
+                            shkoje_palester: document.getElementById('shkoje_palester').value === 'true',
+                            niveli_fitnesit: document.getElementById('niveli_fitnesit').value || 'fillestar',
+                            objektivi: document.getElementById('objektivi').value,
+                            aktiviteti_ditore: document.getElementById('aktiviteti_ditore').value
+                        };
+
+                        // Save to localStorage
+                        saveAppState('results');
+
+                        showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
+                        displayResults(surveyData);
+                    });
+                } else {
+                    console.warn('surveyForm element not found');
+                }
+
+                // Log progress handler
+                const logFormEl = document.getElementById('logProgressForm');
+                if (logFormEl) {
+                    logFormEl.addEventListener('submit', (e) => {
+                        e.preventDefault();
+
+                        const progressData = {
+                            emri_ushtrimit: document.getElementById('exercise_name').value,
+                            setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
+                            repetisione_perfunduar: document.getElementById('reps_completed').value,
+                            pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
+                            shenime: document.getElementById('notes').value,
+                            data: new Date().toISOString()
+                        };
+
+                        progressHistory.push(progressData);
+
+                        // Save to localStorage
+                        saveAppState('results');
+
+                        showAlert('Përparimi u regjistrua me sukses!', 'success');
+                        document.getElementById('logProgressForm').reset();
+                        displayProgress();
+                    });
+                } else {
+                    console.warn('logProgressForm element not found');
+                }
+
+                // Tab switching
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tab = button.dataset.tab;
+                        currentPage = tab; // Update current page
+
+                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                        button.classList.add('active');
+                        document.getElementById(tab).classList.add('active');
+
+                        // Save tab state
+                        saveAppState(tab);
+
+                        if (tab === 'progress') {
+                            displayProgress();
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error('initializeEventListeners error:', err);
+                showAlert('Gabim gjatë inicializimit: ' + (err.message || err), 'error');
+            }
+        }
+
+        // State management
+        let currentUserId = null;
+        let currentPage = 'nutrition';
+        let userData = {};
+        let surveyData = {};
+        let progressHistory = [];
+
+        // Exercise database
+        const exercisesDatabase = {
+            chest: [
+                {name: 'Bench Press', reps: '8-10', sets: 3, desc: 'Ushtrimi më bazik për gjoksin', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
+                {name: 'Incline Bench Press', reps: '8-10', sets: 3, desc: 'Për pjesën e sipërme të gjoksit', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
+                {name: 'Dumbbell Chest Press', reps: '10-12', sets: 3, desc: 'Ushtrim me pesha për frekuencë më të madhe', gif: 'https://media.giphy.com/media/3o7TKMoHaErf6Psl5i/giphy.gif'},
+                {name: 'Push Ups', reps: '12-15', sets: 3, desc: 'Ushtrim me peshë të trupit', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'},
+                {name: 'Cable Flyes', reps: '12-15', sets: 3, desc: 'Ushtrimi i izolimit për gjoksin', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'}
+            ],
+            back: [
+                {name: 'Barbell Rows', reps: '6-8', sets: 3, desc: 'Ushtrimi themelor për shpatin', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
+                {name: 'Pull Ups', reps: '6-10', sets: 3, desc: 'Ngjitje në shufër për shpatin', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
+                {name: 'Dumbbell Rows', reps: '10-12', sets: 3, desc: 'Variacion më fleksibël për shpatin', gif: 'https://media.giphy.com/media/3o7TKYfwCKGnLAPERu/giphy.gif'},
+                {name: 'Lat Pulldowns', reps: '8-12', sets: 3, desc: 'Në makinë - më i lehtë për fillestarët', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Për pjesën e pasme të shpateve', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+            ],
+            legs: [
+                {name: 'Squats', reps: '6-8', sets: 3, desc: 'Më i rëndësishmi për të punuar të gjithë këmbën', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                {name: 'Deadlifts', reps: '3-6', sets: 3, desc: 'Fuqia - pozicion shumë i rëndësishëm', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
+                {name: 'Leg Press', reps: '8-12', sets: 3, desc: 'Në makinë - më i sigurt për fillestarët', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
+                {name: 'Leg Curls', reps: '10-15', sets: 3, desc: 'Ushtrimi i izolimit për muskujt e pasme të cokës', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'},
+                {name: 'Calf Raises', reps: '15-20', sets: 3, desc: 'Për ndërtimin e muskujve të këmbëve të poshtme', gif: 'https://media.giphy.com/media/3o7TKXQ0EBquL7aT7q/giphy.gif'}
+            ],
+            shoulders: [
+                {name: 'Overhead Press', reps: '6-8', sets: 3, desc: 'Ushtrimi themelor për shpatullat', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
+                {name: 'Lateral Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi i izolimit për deltamide të anës', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                {name: 'Front Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi për deltamide të përparme', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'},
+                {name: 'Machine Shoulder Press', reps: '10-12', sets: 3, desc: 'Në makinë për më shumë sigurie', gif: 'https://media.giphy.com/media/3o7TKRqe2ILF4GhfnO/giphy.gif'}
+            ],
+            biceps: [
+                {name: 'Barbell Curls', reps: '8-12', sets: 3, desc: 'Ushtrimi klasik për bicepsin', gif: 'https://media.giphy.com/media/3o7TKUnOBz0hgvIMjq/giphy.gif'},
+                {name: 'Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Ushtrim më fleksibël me pesha të lira', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
+                {name: 'Cable Curls', reps: '10-15', sets: 3, desc: 'Ushr... (truncated for brevity)
