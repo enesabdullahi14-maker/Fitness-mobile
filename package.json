@@ -1,0 +1,15 @@
+{
+  "name": "fitness-mobile",
+  "version": "1.0.0",
+  "description": "Wrapped fitness web app for Capacitor",
+  "scripts": {
+    "prepare-web": "echo 'Place web files in ./web (already copied)'",
+    "cap:init": "npx cap init com.example.fitnessapp FitnessApp --web-dir=web"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.0.0"
+  }
+}
