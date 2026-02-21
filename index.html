@@ -25,6 +25,88 @@
             padding: 20px;
         }
 
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.8s ease 2.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .splash-logo {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: zoomIn 0.8s ease;
+        }
+
+        .splash-text {
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            margin-top: 30px;
+            animation: slideUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Page Transitions */
+        .page-transition {
+            animation: fadeInSlide 0.5s ease;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -77,6 +159,13 @@
 
         .form-section {
             display: block;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .form-section.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .form-section h2 {
@@ -470,6 +559,12 @@
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-logo">💪</div>
+        <div class="splash-text">Fitness App</div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>💪 Aplikacioni i Fitnesit</h1>
@@ -481,7 +576,7 @@
 
         <div class="content">
             <!-- REGISTRATION SECTION -->
-            <div class="form-section" id="registerSection">
+            <div class="form-section active" id="registerSection">
                 <h2>📝 Regjistrimi</h2>
                 <form id="registerForm">
                     <div class="form-row">
@@ -693,13 +788,24 @@
                         saveAppState('survey');
 
                         showAlert('Regjistrimi u përfundua me sukses!', 'success');
-                        document.getElementById('registerSection').style.display = 'none';
-                        document.getElementById('surveySection').style.display = 'block';
+                        
+                        // Transition with fade out/in effect
+                        const registerSection = document.getElementById('registerSection');
+                        const surveySection = document.getElementById('surveySection');
+                        
+                        registerSection.classList.remove('active');
+                        setTimeout(() => {
+                            registerSection.style.display = 'none';
+                            surveySection.style.display = 'block';
+                            setTimeout(() => {
+                                surveySection.classList.add('active');
+                                // Focus first field in survey for better UX
+                                const firstSurveyField = document.getElementById('shkoje_palester');
+                                if (firstSurveyField) firstSurveyField.focus();
+                            }, 50);
+                        }, 500);
+                        
                         document.getElementById('registerForm').reset();
-
-                        // Focus first field in survey for better UX
-                        const firstSurveyField = document.getElementById('shkoje_palester');
-                        if (firstSurveyField) firstSurveyField.focus();
                     });
                 } else {
                     console.warn('registerForm element not found');
@@ -739,7 +845,14 @@
                         saveAppState('results');
 
                         showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
-                        displayResults(surveyData);
+                        
+                        // Transition to results
+                        const surveySection = document.getElementById('surveySection');
+                        surveySection.classList.remove('active');
+                        setTimeout(() => {
+                            surveySection.style.display = 'none';
+                            displayResults(surveyData);
+                        }, 500);
                     });
                 } else {
                     console.warn('surveyForm element not found');
@@ -865,7 +978,9 @@
             if (savedUser) {
                 userData = JSON.parse(savedUser);
                 currentUserId = localStorage.getItem('fitnessAppUserId');
-                document.getElementById('registerSection').style.display = 'none';
+                const registerSection = document.getElementById('registerSection');
+                registerSection.classList.remove('active');
+                registerSection.style.display = 'none';
 
                 if (savedSurvey) {
                     surveyData = JSON.parse(savedSurvey);
@@ -878,7 +993,9 @@
                         setTimeout(() => restoreActiveTab(savedPage), 100);
                     }
                 } else {
-                    document.getElementById('surveySection').style.display = 'block';
+                    const surveySection = document.getElementById('surveySection');
+                    surveySection.style.display = 'block';
+                    setTimeout(() => surveySection.classList.add('active'), 50);
                 }
             }
 
@@ -915,9 +1032,16 @@
             const reg = document.getElementById('registerSection');
             const surv = document.getElementById('surveySection');
             const res = document.getElementById('resultsSection');
-            if (reg) reg.style.display = 'block';
-            if (surv) surv.style.display = 'none';
+            
             if (res) res.classList.remove('show');
+            if (surv) {
+                surv.classList.remove('active');
+                surv.style.display = 'none';
+            }
+            if (reg) {
+                reg.style.display = 'block';
+                setTimeout(() => reg.classList.add('active'), 50);
+            }
 
             const rf = document.getElementById('registerForm');
             if (rf) rf.reset();
@@ -1011,7 +1135,18 @@
         // Display results
         function displayResults(surveyData) {
             document.getElementById('surveySection').style.display = 'none';
-            document.getElementById('resultsSection').classList.add('show');
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.add('show');
+            // Add transition effect
+            setTimeout(() => {
+                resultsSection.style.opacity = '0';
+                resultsSection.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    resultsSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    resultsSection.style.opacity = '1';
+                    resultsSection.style.transform = 'translateY(0)';
+                }, 50);
+            }, 0);
 
             const nutrition = calculateNutrition(
                 userData.mosha, userData.pesha, userData.lartesia,
@@ -1094,15 +1229,68 @@
             if (progressHistory.length === 0) {
                 html = '<p style="color: #999;">Nuk ka përparimi të regjistruar ende.</p>';
             } else {
-                progressHistory.slice().reverse().forEach(entry => {
-                    const date = new Date(entry.data).toLocaleDateString('sq-AL');
+                // Grupo ushtrimet sipas emrit
+                const exerciseGroups = {};
+                progressHistory.forEach(entry => {
+                    if (!exerciseGroups[entry.emri_ushtrimit]) {
+                        exerciseGroups[entry.emri_ushtrimit] = [];
+                    }
+                    exerciseGroups[entry.emri_ushtrimit].push(entry);
+                });
+
+                // Shfaq çdo ushtrimi me historikun e tij
+                Object.keys(exerciseGroups).sort().forEach(exerciseName => {
+                    const sessions = exerciseGroups[exerciseName].sort((a, b) => 
+                        new Date(a.data) - new Date(b.data)
+                    );
+
+                    // Përllogaris statistikat
+                    const firstSession = sessions[0];
+                    const lastSession = sessions[sessions.length - 1];
+                    const totalSessions = sessions.length;
+                    
+                    const weightProgress = lastSession.pesha_zgjedhur - firstSession.pesha_zgjedhur;
+                    const volumeFirst = firstSession.setje_perfunduar * firstSession.repetisione_perfunduar * firstSession.pesha_zgjedhur;
+                    const volumeLast = lastSession.setje_perfunduar * lastSession.repetisione_perfunduar * lastSession.pesha_zgjedhur;
+                    const volumeProgress = volumeLast - volumeFirst;
+
                     html += `
-                        <div class="result-item">
-                            <strong>${entry.emri_ushtrimit}</strong><br>
-                            <span style="color: #999; font-size: 0.9em;">${date}</span><br>
-                            <strong>Setje:</strong> ${entry.setje_perfunduar} × ${entry.repetisione_perfunduar} | 
-                            <strong>Pesha:</strong> ${entry.pesha_zgjedhur}kg
-                            ${entry.shenime ? `<br><em style="color: #667eea;">Shënim: ${entry.shenime}</em>` : ''}
+                        <div class="result-item" style="margin-bottom: 20px; border-left: 4px solid #667eea; padding-left: 12px;">
+                            <strong style="font-size: 1.1em; color: #667eea;">${exerciseName}</strong>
+                            <div style="margin: 8px 0; padding: 8px; background: rgba(102, 126, 234, 0.05); border-radius: 6px;">
+                                <strong>📊 Përmbledhje:</strong> ${totalSessions} seance${totalSessions > 1 ? '' : ''}
+                                ${weightProgress !== 0 ? `<br><strong>Progresion pesha:</strong> ${weightProgress > 0 ? '+' : ''}${weightProgress}kg` : ''}
+                                ${volumeProgress !== 0 ? `<br><strong>Progresion vëllim:</strong> ${volumeProgress > 0 ? '+' : ''}${volumeProgress.toFixed(0)}kg total` : ''}
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <strong>📅 Historik seancash:</strong>
+                    `;
+
+                    // Lista e seancave (nga më e reja tek më e vjetra)
+                    sessions.slice().reverse().forEach((entry, idx) => {
+                        const date = new Date(entry.data).toLocaleDateString('sq-AL', { 
+                            day: 'numeric', month: 'short', year: 'numeric' 
+                        });
+                        const isLatest = idx === 0;
+                        const isPR = sessions.every(s => 
+                            s === entry || s.pesha_zgjedhur <= entry.pesha_zgjedhur
+                        );
+                        
+                        html += `
+                            <div style="margin: 6px 0; padding: 8px; background: ${isLatest ? 'rgba(102, 206, 135, 0.1)' : 'rgba(0,0,0,0.02)'}; border-radius: 4px;">
+                                <span style="color: #999; font-size: 0.85em;">${date}</span>
+                                ${isLatest ? '<span style="background: #66ce87; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">E fundit</span>' : ''}
+                                ${isPR && sessions.length > 1 ? '<span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">PR</span>' : ''}
+                                <br>
+                                <strong>${entry.setje_perfunduar}</strong> setje × <strong>${entry.repetisione_perfunduar}</strong> reps @ <strong>${entry.pesha_zgjedhur}kg</strong>
+                                <span style="color: #999; font-size: 0.85em; margin-left: 8px;">(Vëllim: ${(entry.setje_perfunduar * entry.repetisione_perfunduar * entry.pesha_zgjedhur).toFixed(0)}kg)</span>
+                                ${entry.shenime ? `<br><em style="color: #667eea; font-size: 0.9em;">💬 ${entry.shenime}</em>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
                         </div>
                     `;
                 });
@@ -1258,6 +1446,14 @@
 
         // Page load
         window.addEventListener('DOMContentLoaded', () => {
+            // Hide splash screen after 3 seconds
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splashScreen');
+                if (splashScreen) {
+                    splashScreen.style.display = 'none';
+                }
+            }, 3000);
+
             loadAppState();
             initializeEventListeners();
 
