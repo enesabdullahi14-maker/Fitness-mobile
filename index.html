@@ -20,7 +20,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 20px;
         }
@@ -32,7 +32,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -56,9 +56,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5em;
+            overflow: hidden;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: zoomIn 0.8s ease;
+        }
+
+        .splash-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .splash-text {
@@ -113,17 +119,36 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
             text-align: center;
             position: relative;
+        }
+
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .header h1 {
@@ -159,19 +184,24 @@
 
         .form-section {
             display: block;
-            opacity: 0;
+            opacity: 1;
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        .form-section.active {
+        .form-section.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .form-section.fade-in {
             opacity: 1;
             transform: translateY(0);
         }
 
         .form-section h2 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
         }
 
@@ -204,12 +234,12 @@
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
             padding: 14px 30px;
             border: none;
@@ -223,7 +253,8 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            background: #000;
         }
 
         .alert {
@@ -254,7 +285,7 @@
         }
 
         .results h3 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
@@ -280,21 +311,36 @@
         }
 
         .tab-button:hover {
-            color: #667eea;
+            color: #1a1a1a;
             transform: none;
         }
 
         .tab-button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
         }
 
         .tab-content {
             display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .tab-content.active {
             display: block;
+            animation: slideInTab 0.4s ease forwards;
+        }
+
+        @keyframes slideInTab {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .nutrition-grid {
@@ -316,7 +362,7 @@
         .nutrition-card .value {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         .nutrition-card .label {
@@ -330,7 +376,7 @@
             padding: 15px;
             margin-top: 15px;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -374,23 +420,23 @@
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 10px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .workout-item h4 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 10px;
         }
 
         .muscle-group-title {
             background: #f0f0f0;
             padding: 10px 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             margin-top: 25px;
             margin-bottom: 15px;
             font-weight: 600;
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         .exercise-grid {
@@ -438,7 +484,7 @@
         }
 
         .exercise-info h4 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 8px;
             font-size: 1.1em;
         }
@@ -518,13 +564,13 @@
             background: white;
             padding: 15px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .result-item strong {
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         @media (max-width: 600px) {
@@ -561,12 +607,17 @@
 <body>
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <div class="splash-logo">💪</div>
+        <div class="splash-logo">
+            <img src="../logo.png.png" alt="Fitness Logo">
+        </div>
         <div class="splash-text">Fitness App</div>
     </div>
 
     <div class="container">
         <div class="header">
+            <div class="header-logo">
+                <img src="../logo.png.png" alt="Fitness Logo">
+            </div>
             <h1>💪 Aplikacioni i Fitnesit</h1>
             <p>Plani juaj i personalizuar për fitness dhe nutricion</p>
             <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">Rifresko Profilin</button>
@@ -576,7 +627,7 @@
 
         <div class="content">
             <!-- REGISTRATION SECTION -->
-            <div class="form-section active" id="registerSection">
+            <div class="form-section" id="registerSection">
                 <h2>📝 Regjistrimi</h2>
                 <form id="registerForm">
                     <div class="form-row">
@@ -793,12 +844,22 @@
                         const registerSection = document.getElementById('registerSection');
                         const surveySection = document.getElementById('surveySection');
                         
-                        registerSection.classList.remove('active');
+                        registerSection.style.opacity = '1';
+                        registerSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        registerSection.style.transform = 'translateY(-20px)';
+                        registerSection.style.opacity = '0';
+                        
                         setTimeout(() => {
                             registerSection.style.display = 'none';
+                            registerSection.style.transform = 'translateY(0)';
                             surveySection.style.display = 'block';
+                            surveySection.style.opacity = '0';
+                            surveySection.style.transform = 'translateY(20px)';
+                            surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                            
                             setTimeout(() => {
-                                surveySection.classList.add('active');
+                                surveySection.style.opacity = '1';
+                                surveySection.style.transform = 'translateY(0)';
                                 // Focus first field in survey for better UX
                                 const firstSurveyField = document.getElementById('shkoje_palester');
                                 if (firstSurveyField) firstSurveyField.focus();
@@ -848,9 +909,13 @@
                         
                         // Transition to results
                         const surveySection = document.getElementById('surveySection');
-                        surveySection.classList.remove('active');
+                        surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        surveySection.style.opacity = '0';
+                        surveySection.style.transform = 'translateY(-20px)';
+                        
                         setTimeout(() => {
                             surveySection.style.display = 'none';
+                            surveySection.style.transform = 'translateY(0)';
                             displayResults(surveyData);
                         }, 500);
                     });
@@ -892,18 +957,34 @@
                         const tab = button.dataset.tab;
                         currentPage = tab; // Update current page
 
-                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                        button.classList.add('active');
-                        document.getElementById(tab).classList.add('active');
-
-                        // Save tab state
-                        saveAppState(tab);
-
-                        if (tab === 'progress') {
-                            displayProgress();
+                        // Fade out current tab
+                        const currentActiveTab = document.querySelector('.tab-content.active');
+                        if (currentActiveTab) {
+                            currentActiveTab.style.opacity = '0';
+                            currentActiveTab.style.transform = 'translateX(-20px)';
                         }
+
+                        setTimeout(() => {
+                            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(c => {
+                                c.classList.remove('active');
+                                c.style.opacity = '0';
+                                c.style.transform = 'translateX(20px)';
+                            });
+
+                            button.classList.add('active');
+                            const newTab = document.getElementById(tab);
+                            if (newTab) {
+                                newTab.classList.add('active');
+                            }
+
+                            // Save tab state
+                            saveAppState(tab);
+
+                            if (tab === 'progress') {
+                                displayProgress();
+                            }
+                        }, 200);
                     });
                 });
             } catch (err) {
@@ -979,7 +1060,6 @@
                 userData = JSON.parse(savedUser);
                 currentUserId = localStorage.getItem('fitnessAppUserId');
                 const registerSection = document.getElementById('registerSection');
-                registerSection.classList.remove('active');
                 registerSection.style.display = 'none';
 
                 if (savedSurvey) {
@@ -995,7 +1075,6 @@
                 } else {
                     const surveySection = document.getElementById('surveySection');
                     surveySection.style.display = 'block';
-                    setTimeout(() => surveySection.classList.add('active'), 50);
                 }
             }
 
@@ -1034,14 +1113,8 @@
             const res = document.getElementById('resultsSection');
             
             if (res) res.classList.remove('show');
-            if (surv) {
-                surv.classList.remove('active');
-                surv.style.display = 'none';
-            }
-            if (reg) {
-                reg.style.display = 'block';
-                setTimeout(() => reg.classList.add('active'), 50);
-            }
+            if (surv) surv.style.display = 'none';
+            if (reg) reg.style.display = 'block';
 
             const rf = document.getElementById('registerForm');
             if (rf) rf.reset();
@@ -1255,9 +1328,9 @@
                     const volumeProgress = volumeLast - volumeFirst;
 
                     html += `
-                        <div class="result-item" style="margin-bottom: 20px; border-left: 4px solid #667eea; padding-left: 12px;">
-                            <strong style="font-size: 1.1em; color: #667eea;">${exerciseName}</strong>
-                            <div style="margin: 8px 0; padding: 8px; background: rgba(102, 126, 234, 0.05); border-radius: 6px;">
+                        <div class="result-item" style="margin-bottom: 20px; border-left: 4px solid #1a1a1a; padding-left: 12px;">
+                            <strong style="font-size: 1.1em; color: #1a1a1a;">${exerciseName}</strong>
+                            <div style="margin: 8px 0; padding: 8px; background: rgba(26, 26, 26, 0.05); border-radius: 6px;">
                                 <strong>📊 Përmbledhje:</strong> ${totalSessions} seance${totalSessions > 1 ? '' : ''}
                                 ${weightProgress !== 0 ? `<br><strong>Progresion pesha:</strong> ${weightProgress > 0 ? '+' : ''}${weightProgress}kg` : ''}
                                 ${volumeProgress !== 0 ? `<br><strong>Progresion vëllim:</strong> ${volumeProgress > 0 ? '+' : ''}${volumeProgress.toFixed(0)}kg total` : ''}
@@ -1284,7 +1357,7 @@
                                 <br>
                                 <strong>${entry.setje_perfunduar}</strong> setje × <strong>${entry.repetisione_perfunduar}</strong> reps @ <strong>${entry.pesha_zgjedhur}kg</strong>
                                 <span style="color: #999; font-size: 0.85em; margin-left: 8px;">(Vëllim: ${(entry.setje_perfunduar * entry.repetisione_perfunduar * entry.pesha_zgjedhur).toFixed(0)}kg)</span>
-                                ${entry.shenime ? `<br><em style="color: #667eea; font-size: 0.9em;">💬 ${entry.shenime}</em>` : ''}
+                                ${entry.shenime ? `<br><em style="color: #1a1a1a; font-size: 0.9em;">💬 ${entry.shenime}</em>` : ''}
                             </div>
                         `;
                     });
