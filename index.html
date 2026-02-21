@@ -199,12 +199,21 @@
         .form-section {
             display: block;
             opacity: 1;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(0);
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-section.hidden {
+            opacity: 0 !important;
+            transform: translateY(30px) !important;
+            pointer-events: none;
+            position: absolute;
+            visibility: hidden;
         }
 
         .form-section.fade-out {
             opacity: 0;
-            transform: translateY(-20px);
+            transform: translateY(-30px);
         }
 
         .form-section.fade-in {
@@ -687,7 +696,7 @@
             </div>
 
             <!-- SURVEY SECTION -->
-            <div class="form-section" id="surveySection" style="display: none;">
+            <div class="form-section hidden" id="surveySection">
                 <h2>📋 Pyetësori</h2>
                 <form id="surveyForm">
                     <div class="form-group">
@@ -861,31 +870,33 @@
 
                         showAlert('Regjistrimi u përfundua me sukses!', 'success');
                         
-                        // Transition with fade out/in effect
+                        // Transition with CSS classes
                         const registerSection = document.getElementById('registerSection');
                         const surveySection = document.getElementById('surveySection');
                         
-                        registerSection.style.opacity = '1';
-                        registerSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                        registerSection.style.transform = 'translateY(-20px)';
-                        registerSection.style.opacity = '0';
+                        // Fade out register section
+                        registerSection.classList.add('fade-out');
                         
                         setTimeout(() => {
-                            registerSection.style.display = 'none';
-                            registerSection.style.transform = 'translateY(0)';
-                            surveySection.style.display = 'block';
+                            registerSection.classList.add('hidden');
+                            registerSection.classList.remove('fade-out');
+                            
+                            // Show and fade in survey section
+                            surveySection.classList.remove('hidden');
                             surveySection.style.opacity = '0';
                             surveySection.style.transform = 'translateY(20px)';
-                            surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                             
                             setTimeout(() => {
                                 surveySection.style.opacity = '1';
                                 surveySection.style.transform = 'translateY(0)';
-                                // Focus first field in survey for better UX
-                                const firstSurveyField = document.getElementById('shkoje_palester');
-                                if (firstSurveyField) firstSurveyField.focus();
+                                
+                                // Focus first field
+                                setTimeout(() => {
+                                    const firstSurveyField = document.getElementById('shkoje_palester');
+                                    if (firstSurveyField) firstSurveyField.focus();
+                                }, 100);
                             }, 50);
-                        }, 500);
+                        }, 800);
                         
                         document.getElementById('registerForm').reset();
                     });
@@ -930,15 +941,21 @@
                         
                         // Transition to results
                         const surveySection = document.getElementById('surveySection');
-                        surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                        surveySection.style.opacity = '0';
-                        surveySection.style.transform = 'translateY(-20px)';
+                        surveySection.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                        
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                surveySection.style.opacity = '0';
+                                surveySection.style.transform = 'translateY(-30px)';
+                            });
+                        });
                         
                         setTimeout(() => {
-                            surveySection.style.display = 'none';
+                            surveySection.classList.add('hidden');
+                            surveySection.style.opacity = '1';
                             surveySection.style.transform = 'translateY(0)';
                             displayResults(surveyData);
-                        }, 500);
+                        }, 800);
                     });
                 } else {
                     console.warn('surveyForm element not found');
@@ -981,8 +998,11 @@
                         // Fade out current tab
                         const currentActiveTab = document.querySelector('.tab-content.active');
                         if (currentActiveTab) {
-                            currentActiveTab.style.opacity = '0';
-                            currentActiveTab.style.transform = 'translateX(-20px)';
+                            currentActiveTab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            requestAnimationFrame(() => {
+                                currentActiveTab.style.opacity = '0';
+                                currentActiveTab.style.transform = 'translateX(-20px)';
+                            });
                         }
 
                         setTimeout(() => {
@@ -997,6 +1017,12 @@
                             const newTab = document.getElementById(tab);
                             if (newTab) {
                                 newTab.classList.add('active');
+                                newTab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                
+                                requestAnimationFrame(() => {
+                                    newTab.style.opacity = '1';
+                                    newTab.style.transform = 'translateX(0)';
+                                });
                             }
 
                             // Save tab state
@@ -1005,7 +1031,7 @@
                             if (tab === 'progress') {
                                 displayProgress();
                             }
-                        }, 200);
+                        }, 300);
                     });
                 });
             } catch (err) {
@@ -1081,11 +1107,11 @@
                 userData = JSON.parse(savedUser);
                 currentUserId = localStorage.getItem('fitnessAppUserId');
                 const registerSection = document.getElementById('registerSection');
-                registerSection.style.display = 'none';
+                registerSection.classList.add('hidden');
 
                 if (savedSurvey) {
                     surveyData = JSON.parse(savedSurvey);
-                    document.getElementById('surveySection').style.display = 'none';
+                    document.getElementById('surveySection').classList.add('hidden');
                     document.getElementById('resultsSection').classList.add('show');
                     displayResults(surveyData);
 
@@ -1095,7 +1121,7 @@
                     }
                 } else {
                     const surveySection = document.getElementById('surveySection');
-                    surveySection.style.display = 'block';
+                    surveySection.classList.remove('hidden');
                 }
             }
 
@@ -1134,8 +1160,8 @@
             const res = document.getElementById('resultsSection');
             
             if (res) res.classList.remove('show');
-            if (surv) surv.style.display = 'none';
-            if (reg) reg.style.display = 'block';
+            if (surv) surv.classList.add('hidden');
+            if (reg) reg.classList.remove('hidden');
 
             const rf = document.getElementById('registerForm');
             if (rf) rf.reset();
@@ -1228,19 +1254,21 @@
 
         // Display results
         function displayResults(surveyData) {
-            document.getElementById('surveySection').style.display = 'none';
+            document.getElementById('surveySection').classList.add('hidden');
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.classList.add('show');
+            
             // Add transition effect
-            setTimeout(() => {
-                resultsSection.style.opacity = '0';
-                resultsSection.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    resultsSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            resultsSection.style.opacity = '0';
+            resultsSection.style.transform = 'translateY(30px)';
+            resultsSection.style.transition = 'opacity 1s ease, transform 1s ease';
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
                     resultsSection.style.opacity = '1';
                     resultsSection.style.transform = 'translateY(0)';
-                }, 50);
-            }, 0);
+                });
+            });
 
             const nutrition = calculateNutrition(
                 userData.mosha, userData.pesha, userData.lartesia,
