@@ -20,9 +20,97 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 20px;
+        }
+
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.8s ease 2.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .splash-logo {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: zoomIn 0.8s ease;
+        }
+
+        .splash-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .splash-text {
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            margin-top: 30px;
+            animation: slideUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Page Transitions */
+        .page-transition {
+            animation: fadeInSlide 0.5s ease;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .container {
@@ -31,17 +119,36 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
             text-align: center;
             position: relative;
+        }
+
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .header h1 {
@@ -77,12 +184,24 @@
 
         .form-section {
             display: block;
+            opacity: 1;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .form-section.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .form-section.fade-in {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .form-section h2 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 2px solid #e0e0e0;
             padding-bottom: 10px;
         }
 
@@ -115,12 +234,12 @@
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
             padding: 14px 30px;
             border: none;
@@ -134,7 +253,8 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            background: #000;
         }
 
         .alert {
@@ -165,7 +285,7 @@
         }
 
         .results h3 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
@@ -191,21 +311,36 @@
         }
 
         .tab-button:hover {
-            color: #667eea;
+            color: #1a1a1a;
             transform: none;
         }
 
         .tab-button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
         }
 
         .tab-content {
             display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .tab-content.active {
             display: block;
+            animation: slideInTab 0.4s ease forwards;
+        }
+
+        @keyframes slideInTab {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .nutrition-grid {
@@ -227,7 +362,7 @@
         .nutrition-card .value {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         .nutrition-card .label {
@@ -241,7 +376,7 @@
             padding: 15px;
             margin-top: 15px;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -285,23 +420,23 @@
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 10px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .workout-item h4 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 10px;
         }
 
         .muscle-group-title {
             background: #f0f0f0;
             padding: 10px 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             margin-top: 25px;
             margin-bottom: 15px;
             font-weight: 600;
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         .exercise-grid {
@@ -349,7 +484,7 @@
         }
 
         .exercise-info h4 {
-            color: #667eea;
+            color: #1a1a1a;
             margin-bottom: 8px;
             font-size: 1.1em;
         }
@@ -429,13 +564,13 @@
             background: white;
             padding: 15px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .result-item strong {
-            color: #667eea;
+            color: #1a1a1a;
         }
 
         @media (max-width: 600px) {
@@ -470,8 +605,19 @@
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-logo">
+            <img src="../logo.png.png" alt="Fitness Logo">
+        </div>
+        <div class="splash-text">Fitness App</div>
+    </div>
+
     <div class="container">
         <div class="header">
+            <div class="header-logo">
+                <img src="../logo.png.png" alt="Fitness Logo">
+            </div>
             <h1>💪 Aplikacioni i Fitnesit</h1>
             <p>Plani juaj i personalizuar për fitness dhe nutricion</p>
             <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">Rifresko Profilin</button>
@@ -488,17 +634,6 @@
                         <div class="form-group">
                             <label>Emri</label>
                             <input type="text" id="emri" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="email" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Fjalëkalimi</label>
-                            <input type="password" id="password" required>
                         </div>
                         <div class="form-group">
                             <label>Gjinia</label>
@@ -649,7 +784,7 @@
                 <p><strong>Setje:</strong> <span id="previousSets">-</span></p>
                 <p><strong>Përsëritje:</strong> <span id="previousReps">-</span></p>
                 <p><strong>Pesha:</strong> <span id="previousWeight">-</span> kg</p>
-                <p style="font-size: 0.9em; color: #666;"></p>
+                <p style="font-size: 0.9em; color: #666;"><strong>Shënim:</strong> <span id="previousNotes">-</span></p>
             </div>
 
             <form id="modalProgressForm" style="margin-top: 20px;">
@@ -690,8 +825,6 @@
 
                         userData = {
                             emri: document.getElementById('emri').value,
-                            email: document.getElementById('email').value,
-                            password: document.getElementById('password').value,
                             gjinia: document.getElementById('gjinia').value,
                             mosha: parseInt(document.getElementById('mosha').value),
                             pesha: parseFloat(document.getElementById('pesha').value),
@@ -706,27 +839,41 @@
                         saveAppState('survey');
 
                         showAlert('Regjistrimi u përfundua me sukses!', 'success');
-                        document.getElementById('registerSection').style.display = 'none';
-                        document.getElementById('surveySection').style.display = 'block';
+                        
+                        // Transition with fade out/in effect
+                        const registerSection = document.getElementById('registerSection');
+                        const surveySection = document.getElementById('surveySection');
+                        
+                        registerSection.style.opacity = '1';
+                        registerSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        registerSection.style.transform = 'translateY(-20px)';
+                        registerSection.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            registerSection.style.display = 'none';
+                            registerSection.style.transform = 'translateY(0)';
+                            surveySection.style.display = 'block';
+                            surveySection.style.opacity = '0';
+                            surveySection.style.transform = 'translateY(20px)';
+                            surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                            
+                            setTimeout(() => {
+                                surveySection.style.opacity = '1';
+                                surveySection.style.transform = 'translateY(0)';
+                                // Focus first field in survey for better UX
+                                const firstSurveyField = document.getElementById('shkoje_palester');
+                                if (firstSurveyField) firstSurveyField.focus();
+                            }, 50);
+                        }, 500);
+                        
                         document.getElementById('registerForm').reset();
-
-                        // Focus first field in survey for better UX
-                        const firstSurveyField = document.getElementById('shkoje_palester');
-                        if (firstSurveyField) firstSurveyField.focus();
                     });
                 } else {
                     console.warn('registerForm element not found');
-                    window.addEventListener('DOMContentLoaded', () => {
-                        loadAppState();
-                        initializeEventListeners();
+                }
 
-                        // Register service worker for PWA
-                        if ('serviceWorker' in navigator) {
-                            navigator.serviceWorker.register('service-worker.js')
-                              .then(() => console.log('Service worker registered'))
-                              .catch((err) => console.warn('SW register failed:', err));
-                        }
-                    });
+                // Show/hide level selection based on gym attendance
+                const shkoEl = document.getElementById('shkoje_palester');
                 if (shkoEl) {
                     shkoEl.addEventListener('change', (e) => {
                         const nivelGroup = document.getElementById('nivelGroup');
@@ -759,7 +906,18 @@
                         saveAppState('results');
 
                         showAlert('Pyetësori u përfundua dhe rekomandimet janë gati!', 'success');
-                        displayResults(surveyData);
+                        
+                        // Transition to results
+                        const surveySection = document.getElementById('surveySection');
+                        surveySection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        surveySection.style.opacity = '0';
+                        surveySection.style.transform = 'translateY(-20px)';
+                        
+                        setTimeout(() => {
+                            surveySection.style.display = 'none';
+                            surveySection.style.transform = 'translateY(0)';
+                            displayResults(surveyData);
+                        }, 500);
                     });
                 } else {
                     console.warn('surveyForm element not found');
@@ -799,18 +957,34 @@
                         const tab = button.dataset.tab;
                         currentPage = tab; // Update current page
 
-                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                        button.classList.add('active');
-                        document.getElementById(tab).classList.add('active');
-
-                        // Save tab state
-                        saveAppState(tab);
-
-                        if (tab === 'progress') {
-                            displayProgress();
+                        // Fade out current tab
+                        const currentActiveTab = document.querySelector('.tab-content.active');
+                        if (currentActiveTab) {
+                            currentActiveTab.style.opacity = '0';
+                            currentActiveTab.style.transform = 'translateX(-20px)';
                         }
+
+                        setTimeout(() => {
+                            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(c => {
+                                c.classList.remove('active');
+                                c.style.opacity = '0';
+                                c.style.transform = 'translateX(20px)';
+                            });
+
+                            button.classList.add('active');
+                            const newTab = document.getElementById(tab);
+                            if (newTab) {
+                                newTab.classList.add('active');
+                            }
+
+                            // Save tab state
+                            saveAppState(tab);
+
+                            if (tab === 'progress') {
+                                displayProgress();
+                            }
+                        }, 200);
                     });
                 });
             } catch (err) {
@@ -858,4 +1032,518 @@
             biceps: [
                 {name: 'Barbell Curls', reps: '8-12', sets: 3, desc: 'Ushtrimi klasik për bicepsin', gif: 'https://media.giphy.com/media/3o7TKUnOBz0hgvIMjq/giphy.gif'},
                 {name: 'Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Ushtrim më fleksibël me pesha të lira', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
-                {name: 'Cable Curls', reps: '10-15', sets: 3, desc: 'Ushr... (truncated for brevity)
+                {name: 'Cable Curls', reps: '10-15', sets: 3, desc: 'Ushtrimi me tension konstante', gif: 'https://media.giphy.com/media/3o7TKTPUXo7xdEgR4Y/giphy.gif'},
+                {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Ushtrimi në stollin special për biceps', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
+            ],
+            triceps: [
+                {name: 'Triceps Dips', reps: '8-12', sets: 3, desc: 'Ushtrimi themelor për tricepsin', gif: 'https://media.giphy.com/media/3o7TKd1tD0X4ztbMi0/giphy.gif'},
+                {name: 'Skull Crushers', reps: '8-12', sets: 3, desc: 'Ushtrimi i shtesë për tricepsin', gif: 'https://media.giphy.com/media/3o7TKSQdpMXAK64pNu/giphy.gif'},
+                {name: 'Rope Pushdowns', reps: '10-15', sets: 3, desc: 'Ushtrimi i izolimit me kabllo', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
+                {name: 'Overhead Extension', reps: '10-12', sets: 3, desc: 'Ushtrimi mbi kokë për tricepsin', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
+            ],
+            abs: [
+                {name: 'Crunches', reps: '15-20', sets: 3, desc: 'Ushtrimi për barkat e sipërme', gif: 'https://media.giphy.com/media/3o7TKPF1cKHKk0eGZq/giphy.gif'},
+                {name: 'Hanging Leg Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi në shufër më i vështirë për barkat', gif: 'https://media.giphy.com/media/3o7TKZ9KJM5OmBXdwY/giphy.gif'},
+                {name: 'Cable Crunches', reps: '12-15', sets: 3, desc: 'Ushtrimi me kabllo për barkat', gif: 'https://media.giphy.com/media/3o7TKWPrFdkIPZzZhm/giphy.gif'},
+                {name: 'Planks', reps: '30-60s', sets: 3, desc: 'Mbaj pozicionin për kohë të gjatë', gif: 'https://media.giphy.com/media/3o7TKMZTKfBEVVF1dq/giphy.gif'}
+            ]
+        };
+
+        // Load app state
+        function loadAppState() {
+            const savedUser = localStorage.getItem('fitnessAppUser');
+            const savedSurvey = localStorage.getItem('fitnessAppSurvey');
+            const savedProgress = localStorage.getItem('fitnessAppProgress');
+            const savedPage = localStorage.getItem('fitnessAppPage');
+
+            if (savedUser) {
+                userData = JSON.parse(savedUser);
+                currentUserId = localStorage.getItem('fitnessAppUserId');
+                const registerSection = document.getElementById('registerSection');
+                registerSection.style.display = 'none';
+
+                if (savedSurvey) {
+                    surveyData = JSON.parse(savedSurvey);
+                    document.getElementById('surveySection').style.display = 'none';
+                    document.getElementById('resultsSection').classList.add('show');
+                    displayResults(surveyData);
+
+                    if (savedPage) {
+                        currentPage = savedPage;
+                        setTimeout(() => restoreActiveTab(savedPage), 100);
+                    }
+                } else {
+                    const surveySection = document.getElementById('surveySection');
+                    surveySection.style.display = 'block';
+                }
+            }
+
+            if (savedProgress) {
+                progressHistory = JSON.parse(savedProgress);
+            }
+        }
+
+        // Save app state
+        function saveAppState(page) {
+            localStorage.setItem('fitnessAppUser', JSON.stringify(userData));
+            localStorage.setItem('fitnessAppUserId', currentUserId);
+            localStorage.setItem('fitnessAppSurvey', JSON.stringify(surveyData));
+            localStorage.setItem('fitnessAppProgress', JSON.stringify(progressHistory));
+            localStorage.setItem('fitnessAppPage', page);
+        }
+
+        // Reset profile: clears local storage and returns to registration
+        function resetProfile() {
+            if (!confirm('Doni të rifreskoni profilin dhe të filloni nga e para? Të gjitha të dhënat lokale do të fshihen.')) return;
+            localStorage.removeItem('fitnessAppUser');
+            localStorage.removeItem('fitnessAppUserId');
+            localStorage.removeItem('fitnessAppSurvey');
+            localStorage.removeItem('fitnessAppProgress');
+            localStorage.removeItem('fitnessAppPage');
+
+            currentUserId = null;
+            userData = {};
+            surveyData = {};
+            progressHistory = [];
+            currentPage = 'nutrition';
+
+            // UI reset
+            const reg = document.getElementById('registerSection');
+            const surv = document.getElementById('surveySection');
+            const res = document.getElementById('resultsSection');
+            
+            if (res) res.classList.remove('show');
+            if (surv) surv.style.display = 'none';
+            if (reg) reg.style.display = 'block';
+
+            const rf = document.getElementById('registerForm');
+            if (rf) rf.reset();
+
+            showAlert('Profil u rifreskua. Ju lutem regjistrohuni përsëri.', 'success');
+            saveAppState(currentPage);
+        }
+
+        // Update JS status
+        function updateJsStatus(message, ok) {
+            const el = document.getElementById('jsStatus');
+            if (!el) return;
+            el.textContent = 'JS: ' + message;
+            el.className = ok ? 'ok' : 'error';
+            el.style.display = 'block';
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type;
+            alertDiv.textContent = message;
+            const content = document.querySelector('.content');
+            if (content) {
+                content.insertBefore(alertDiv, content.firstChild);
+            }
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        // Restore active tab
+        function restoreActiveTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const btn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+            const content = document.getElementById(tabName);
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.add('active');
+            if (tabName === 'progress') displayProgress();
+        }
+
+        // Calculate nutrition
+        function calculateNutrition(mosha, pesha, lartesia, gjinia, aktiviteti, objektivi) {
+            let BMR;
+            if (gjinia === 'mashkull') {
+                BMR = 88.362 + (13.397 * pesha) + (4.799 * lartesia) - (5.677 * mosha);
+            } else {
+                BMR = 447.593 + (9.247 * pesha) + (3.098 * lartesia) - (4.330 * mosha);
+            }
+            
+            const AKS = {
+                'i_ulte': 1.375,
+                'lehtesisht_aktiv': 1.55,
+                'moderatisht_aktiv': 1.725,
+                'shumë_aktiv': 1.9
+            };
+            
+            const TDEE = BMR * AKS[aktiviteti];
+            let kalori_final = TDEE;
+            
+            if (objektivi === 'bulk') {
+                kalori_final = TDEE + 300;
+            } else if (objektivi === 'cut') {
+                kalori_final = TDEE - 500;
+            }
+            
+            let proteine_percent = 0.35, carbs_percent = 0.45, fat_percent = 0.20;
+            
+            if (objektivi === 'bulk') {
+                proteine_percent = 0.32;
+                carbs_percent = 0.50;
+                fat_percent = 0.18;
+            } else if (objektivi === 'cut') {
+                proteine_percent = 0.40;
+                carbs_percent = 0.35;
+                fat_percent = 0.25;
+            }
+            
+            return {
+                BMR: Math.round(BMR),
+                TDEE: Math.round(TDEE),
+                kalori_final: Math.round(kalori_final),
+                proteine: Math.round((kalori_final * proteine_percent) / 4),
+                karbohidrate: Math.round((kalori_final * carbs_percent) / 4),
+                yndyre: Math.round((kalori_final * fat_percent) / 9),
+                proteine_percent: Math.round(proteine_percent * 100),
+                carbs_percent: Math.round(carbs_percent * 100),
+                fat_percent: Math.round(fat_percent * 100)
+            };
+        }
+
+        // Display results
+        function displayResults(surveyData) {
+            document.getElementById('surveySection').style.display = 'none';
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.add('show');
+            // Add transition effect
+            setTimeout(() => {
+                resultsSection.style.opacity = '0';
+                resultsSection.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    resultsSection.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    resultsSection.style.opacity = '1';
+                    resultsSection.style.transform = 'translateY(0)';
+                }, 50);
+            }, 0);
+
+            const nutrition = calculateNutrition(
+                userData.mosha, userData.pesha, userData.lartesia,
+                userData.gjinia, surveyData.aktiviteti_ditore, surveyData.objektivi
+            );
+
+            let nutritionHTML = `
+                <div class="nutrition-grid">
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.kalori_final}</div>
+                        <div class="label">Kalori/Ditë</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.proteine}g</div>
+                        <div class="label">Proteinat (${nutrition.proteine_percent}%)</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.karbohidrate}g</div>
+                        <div class="label">Karbohidrate (${nutrition.carbs_percent}%)</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.yndyre}g</div>
+                        <div class="label">Yndyra (${nutrition.fat_percent}%)</div>
+                    </div>
+                </div>
+                <div class="nutrition-detail">
+                    <h4>📊 Analiza e Dhuruara Tuaja</h4>
+                    <p><strong>Mosha:</strong> ${userData.mosha} vjet</p>
+                    <p><strong>Pesha:</strong> ${userData.pesha} kg</p>
+                    <p><strong>Lartësia:</strong> ${userData.lartesia} cm</p>
+                    <p><strong>BMI:</strong> ${(userData.pesha / ((userData.lartesia/100) ** 2)).toFixed(1)}</p>
+                </div>
+                <div class="nutrition-detail">
+                    <h4>🔥 Llogaritjet e Energjisë</h4>
+                    <p><strong>BMR:</strong> ${nutrition.BMR} kalori/ditë</p>
+                    <p><strong>TDEE:</strong> ${nutrition.TDEE} kalori/ditë</p>
+                    <p><strong>Kalori të Rekomanduara:</strong> ${nutrition.kalori_final} kalori/ditë</p>
+                </div>
+            `;
+            document.getElementById('nutritionResults').innerHTML = nutritionHTML;
+
+            let workoutHTML = '';
+            if (surveyData.shkoje_palester) {
+                const muscleGroups = {
+                    fillestar: ['chest', 'back', 'legs', 'shoulders'],
+                    mesatar: ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps'],
+                    avancuar: ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'abs']
+                };
+                const groupNames = {chest: '💪 Gjoksi', back: '🔙 Shpinda', legs: '🦵 Këmbë', shoulders: '💪 Shpatulla', biceps: '💪 Biceps', triceps: '💪 Triceps', abs: '🤐 Barkushte'};
+                
+                const groups = muscleGroups[surveyData.niveli_fitnesit] || muscleGroups.fillestar;
+                workoutHTML = `<div class="workout-item"><h4>Niveli: ${surveyData.niveli_fitnesit.charAt(0).toUpperCase() + surveyData.niveli_fitnesit.slice(1)}</h4></div>`;
+                
+                groups.forEach(group => {
+                    workoutHTML += `<div class="muscle-group-title">${groupNames[group]}</div><div class="exercise-grid">`;
+                    exercisesDatabase[group].forEach(ex => {
+                        workoutHTML += `
+                            <div class="exercise-card" onclick="openExerciseModal('${ex.name}', '${ex.desc}', '${ex.reps}', '${ex.sets}', '${ex.gif}')">
+                                <div class="exercise-image"><img src="${ex.gif}" alt="${ex.name}"></div>
+                                <div class="exercise-info">
+                                    <h4>${ex.name}</h4>
+                                    <p><strong>Përsëritje:</strong> ${ex.reps}</p>
+                                    <p><strong>Setje:</strong> ${ex.sets}</p>
+                                    <p>${ex.desc}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    workoutHTML += `</div>`;
+                });
+            } else {
+                workoutHTML = `<div class="workout-item"><h4>📌 Aktivitete Fizike</h4><ul><li>🏃 Vrapim: 30-45 min, 3x/javë</li><li>🚴 Ecje: 45-60 min, 5x/javë</li><li>🚲 Biking: 45 min, 2-3x/javë</li><li>🏊 Notim: 30-45 min, 2-3x/javë</li></ul></div>`;
+            }
+            document.getElementById('workoutResults').innerHTML = workoutHTML;
+        }
+
+        // Display progress
+        function displayProgress() {
+            let html = '';
+            if (progressHistory.length === 0) {
+                html = '<p style="color: #999;">Nuk ka përparimi të regjistruar ende.</p>';
+            } else {
+                // Grupo ushtrimet sipas emrit
+                const exerciseGroups = {};
+                progressHistory.forEach(entry => {
+                    if (!exerciseGroups[entry.emri_ushtrimit]) {
+                        exerciseGroups[entry.emri_ushtrimit] = [];
+                    }
+                    exerciseGroups[entry.emri_ushtrimit].push(entry);
+                });
+
+                // Shfaq çdo ushtrimi me historikun e tij
+                Object.keys(exerciseGroups).sort().forEach(exerciseName => {
+                    const sessions = exerciseGroups[exerciseName].sort((a, b) => 
+                        new Date(a.data) - new Date(b.data)
+                    );
+
+                    // Përllogaris statistikat
+                    const firstSession = sessions[0];
+                    const lastSession = sessions[sessions.length - 1];
+                    const totalSessions = sessions.length;
+                    
+                    const weightProgress = lastSession.pesha_zgjedhur - firstSession.pesha_zgjedhur;
+                    const volumeFirst = firstSession.setje_perfunduar * firstSession.repetisione_perfunduar * firstSession.pesha_zgjedhur;
+                    const volumeLast = lastSession.setje_perfunduar * lastSession.repetisione_perfunduar * lastSession.pesha_zgjedhur;
+                    const volumeProgress = volumeLast - volumeFirst;
+
+                    html += `
+                        <div class="result-item" style="margin-bottom: 20px; border-left: 4px solid #1a1a1a; padding-left: 12px;">
+                            <strong style="font-size: 1.1em; color: #1a1a1a;">${exerciseName}</strong>
+                            <div style="margin: 8px 0; padding: 8px; background: rgba(26, 26, 26, 0.05); border-radius: 6px;">
+                                <strong>📊 Përmbledhje:</strong> ${totalSessions} seance${totalSessions > 1 ? '' : ''}
+                                ${weightProgress !== 0 ? `<br><strong>Progresion pesha:</strong> ${weightProgress > 0 ? '+' : ''}${weightProgress}kg` : ''}
+                                ${volumeProgress !== 0 ? `<br><strong>Progresion vëllim:</strong> ${volumeProgress > 0 ? '+' : ''}${volumeProgress.toFixed(0)}kg total` : ''}
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <strong>📅 Historik seancash:</strong>
+                    `;
+
+                    // Lista e seancave (nga më e reja tek më e vjetra)
+                    sessions.slice().reverse().forEach((entry, idx) => {
+                        const date = new Date(entry.data).toLocaleDateString('sq-AL', { 
+                            day: 'numeric', month: 'short', year: 'numeric' 
+                        });
+                        const isLatest = idx === 0;
+                        const isPR = sessions.every(s => 
+                            s === entry || s.pesha_zgjedhur <= entry.pesha_zgjedhur
+                        );
+                        
+                        html += `
+                            <div style="margin: 6px 0; padding: 8px; background: ${isLatest ? 'rgba(102, 206, 135, 0.1)' : 'rgba(0,0,0,0.02)'}; border-radius: 4px;">
+                                <span style="color: #999; font-size: 0.85em;">${date}</span>
+                                ${isLatest ? '<span style="background: #66ce87; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">E fundit</span>' : ''}
+                                ${isPR && sessions.length > 1 ? '<span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">PR</span>' : ''}
+                                <br>
+                                <strong>${entry.setje_perfunduar}</strong> setje × <strong>${entry.repetisione_perfunduar}</strong> reps @ <strong>${entry.pesha_zgjedhur}kg</strong>
+                                <span style="color: #999; font-size: 0.85em; margin-left: 8px;">(Vëllim: ${(entry.setje_perfunduar * entry.repetisione_perfunduar * entry.pesha_zgjedhur).toFixed(0)}kg)</span>
+                                ${entry.shenime ? `<br><em style="color: #1a1a1a; font-size: 0.9em;">💬 ${entry.shenime}</em>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('progressResults').innerHTML = html;
+        }
+
+        // Modal functions
+        function openExerciseModal(name, desc, reps, sets, gif) {
+            document.getElementById('modalImage').src = gif;
+            document.getElementById('modalExerciseName').textContent = name;
+            document.getElementById('modalExerciseName').dataset.exerciseName = name;
+            document.getElementById('modalExerciseDesc').textContent = desc;
+            document.getElementById('modalRecommendedReps').textContent = reps;
+            document.getElementById('modalRecommendedSets').textContent = sets;
+            
+            const prev = progressHistory.filter(e => e.emri_ushtrimit === name).pop();
+            if (prev) {
+                document.getElementById('previousWorkout').style.display = 'block';
+                document.getElementById('previousSets').textContent = prev.setje_perfunduar;
+                document.getElementById('previousReps').textContent = prev.repetisione_perfunduar;
+                document.getElementById('previousWeight').textContent = prev.pesha_zgjedhur;
+                document.getElementById('previousNotes').textContent = prev.shenime || '-';
+            } else {
+                document.getElementById('previousWorkout').style.display = 'none';
+            }
+            
+            document.getElementById('exerciseModal').classList.add('show');
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exerciseModal').classList.remove('show');
+            document.getElementById('modalProgressForm').reset();
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            try {
+                // Register form
+                document.getElementById('registerForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    userData = {
+                        emri: document.getElementById('emri').value,
+                        gjinia: document.getElementById('gjinia').value,
+                        mosha: parseInt(document.getElementById('mosha').value),
+                        pesha: parseFloat(document.getElementById('pesha').value),
+                        lartesia: parseFloat(document.getElementById('lartesia').value)
+                    };
+                    
+                    currentUserId = 'user_' + Date.now();
+                    currentPage = 'survey';
+                    saveAppState('survey');
+                    
+                    showAlert('✓ Regjistrimi u përfundua me sukses!', 'success');
+                    document.getElementById('registerSection').style.display = 'none';
+                    document.getElementById('surveySection').style.display = 'block';
+                    document.getElementById('registerForm').reset();
+                    const field = document.getElementById('shkoje_palester');
+                    if (field) field.focus();
+                });
+
+                // Gym attendance
+                document.getElementById('shkoje_palester').addEventListener('change', (e) => {
+                    const nivelGroup = document.getElementById('nivelGroup');
+                    if (e.target.value === 'true') {
+                        nivelGroup.style.display = 'block';
+                        document.getElementById('niveli_fitnesit').required = true;
+                    } else {
+                        nivelGroup.style.display = 'none';
+                        document.getElementById('niveli_fitnesit').required = false;
+                    }
+                });
+
+                // Survey form
+                document.getElementById('surveyForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    surveyData = {
+                        shkoje_palester: document.getElementById('shkoje_palester').value === 'true',
+                        niveli_fitnesit: document.getElementById('niveli_fitnesit').value || 'fillestar',
+                        objektivi: document.getElementById('objektivi').value,
+                        aktiviteti_ditore: document.getElementById('aktiviteti_ditore').value
+                    };
+                    saveAppState('results');
+                    showAlert('✓ Pyetësori u përfundua!', 'success');
+                    displayResults(surveyData);
+                });
+
+                // Progress form
+                document.getElementById('logProgressForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const entry = {
+                        emri_ushtrimit: document.getElementById('exercise_name').value,
+                        setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
+                        repetisione_perfunduar: document.getElementById('reps_completed').value,
+                        pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
+                        shenime: document.getElementById('notes').value,
+                        data: new Date().toISOString()
+                    };
+                    progressHistory.push(entry);
+                    saveAppState('progress');
+                    showAlert('✓ Përparimi u regjistrua!', 'success');
+                    document.getElementById('logProgressForm').reset();
+                    displayProgress();
+                });
+
+                // Tab buttons
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.dataset.tab;
+                        currentPage = tab;
+                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        btn.classList.add('active');
+                        document.getElementById(tab).classList.add('active');
+                        saveAppState(tab);
+                        if (tab === 'progress') displayProgress();
+                    });
+                });
+
+                // Modal form
+                document.getElementById('modalProgressForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('modalExerciseName').dataset.exerciseName;
+                    const entry = {
+                        emri_ushtrimit: name,
+                        setje_perfunduar: parseInt(document.getElementById('modalSetsCompleted').value),
+                        repetisione_perfunduar: document.getElementById('modalRepsCompleted').value,
+                        pesha_zgjedhur: parseFloat(document.getElementById('modalWeightLifted').value),
+                        shenime: document.getElementById('modalNotes').value,
+                        data: new Date().toISOString()
+                    };
+                    progressHistory.push(entry);
+                    saveAppState(currentPage);
+                    showAlert('✓ Përparimi u regjistrua!', 'success');
+                    closeExerciseModal();
+                    if (currentPage === 'progress') displayProgress();
+                });
+
+                // Modal close
+                document.getElementById('exerciseModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'exerciseModal') closeExerciseModal();
+                });
+
+                // Reset profile button
+                const resetBtn = document.getElementById('resetProfileBtn');
+                if (resetBtn) resetBtn.addEventListener('click', resetProfile);
+
+            } catch (err) {
+                updateJsStatus('Error: ' + err.message, false);
+                console.error('initializeEventListeners:', err);
+            }
+        }
+
+        // Page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Hide splash screen after 3 seconds
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splashScreen');
+                if (splashScreen) {
+                    splashScreen.style.display = 'none';
+                }
+            }, 3000);
+
+            loadAppState();
+            initializeEventListeners();
+
+            // Force-clear old service workers/caches to avoid stale deployed versions
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations()
+                    .then((registrations) => Promise.all(registrations.map((r) => r.unregister())))
+                    .then(() => caches.keys())
+                    .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+                    .catch(() => {});
+            }
+        });
+
+        // Handle global errors
+        window.addEventListener('error', (e) => {
+            updateJsStatus('Error: ' + (e.message || 'unknown'), false);
+        });
+    </script>
+</body>
+</html>
