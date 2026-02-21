@@ -4,13 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikacioni i Fitnesit</title>
-    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Aplikacion për fitness dhe nutricion">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    
+    <!-- iOS Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="FitnessApp">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Fitness">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    
+    <!-- Android Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
         * {
             margin: 0;
@@ -525,22 +539,26 @@
             margin: 20px 0;
         }
 
-        .header .reset-btn {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            background: rgba(255,255,255,0.12);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.18);
-            padding: 8px 12px;
+        .reset-btn {
+            background: #fff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            padding: 12px 24px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px;
+            display: block;
+            transition: all 0.3s ease;
         }
 
-        .header .reset-btn:hover {
-            background: rgba(255,255,255,0.18);
+        .reset-btn:hover {
+            background: #1a1a1a;
+            color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .modal-close {
@@ -608,7 +626,7 @@
     <!-- Splash Screen -->
     <div id="splashScreen">
         <div class="splash-logo">
-            <img src="../logo.png.png" alt="Fitness Logo">
+            <img src="icons/icon-512.png" alt="Fitness Logo">
         </div>
         <div class="splash-text">Fitness App</div>
     </div>
@@ -616,14 +634,17 @@
     <div class="container">
         <div class="header">
             <div class="header-logo">
-                <img src="../logo.png.png" alt="Fitness Logo">
+                <img src="icons/apple-touch-icon.png" alt="Fitness Logo">
             </div>
             <h1>💪 Aplikacioni i Fitnesit</h1>
             <p>Plani juaj i personalizuar për fitness dhe nutricion</p>
-            <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">Rifresko Profilin</button>
         </div>
 
         <div id="jsStatus"></div>
+        
+        <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">
+            🔄 Rifresko Profilin
+        </button>
 
         <div class="content">
             <!-- REGISTRATION SECTION -->
