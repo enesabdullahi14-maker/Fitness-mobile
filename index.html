@@ -32,174 +32,6 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        /* Splash Screen */
-        #splashScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a1a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            animation: fadeOut 0.8s ease 2.5s forwards;
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-
-        .splash-logo {
-            width: 200px;
-            height: 200px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: zoomIn 0.8s ease;
-        }
-
-        .splash-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .splash-text {
-            color: white;
-            font-size: 2em;
-            font-weight: 700;
-            margin-top: 30px;
-            animation: slideUp 0.8s ease 0.3s both;
-        }
-
-        @keyframes zoomIn {
-            from {
-                transform: scale(0);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Page Transitions */
-        .page-transition {
-            animation: fadeInSlide 0.5s ease;
-        }
-
-        @keyframes fadeInSlide {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            background: #1a1a1a;
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .header-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            overflow: hidden;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
-        }
-
-        #jsStatus {
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: none;
-            border-left: 4px solid;
-        }
-
-        #jsStatus.ok {
-            background: #d4edda;
-            color: #155724;
-            border-left-color: #28a745;
-        }
-
-        #jsStatus.error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left-color: #dc3545;
-        }
-
-        .form-section {
-            display: block;
-        }
-
         .form-section.hidden {
             display: none;
         }
@@ -1435,11 +1267,30 @@
                     saveAppState('survey');
                     
                     showAlert('✓ Regjistrimi u përfundua me sukses!', 'success');
-                    document.getElementById('registerSection').style.display = 'none';
-                    document.getElementById('surveySection').style.display = 'block';
+
+                    const overlay = document.getElementById('pageTransitionOverlay');
+                    const registerSection = document.getElementById('registerSection');
+                    const surveySection = document.getElementById('surveySection');
+
+                    if (overlay && registerSection && surveySection) {
+                        overlay.classList.add('active');
+                        setTimeout(() => {
+                            registerSection.classList.add('hidden');
+                            surveySection.classList.remove('hidden');
+                            setTimeout(() => {
+                                overlay.classList.remove('active');
+                                const field = document.getElementById('shkoje_palester');
+                                if (field) field.focus();
+                            }, 100);
+                        }, 500);
+                    } else {
+                        if (registerSection) registerSection.classList.add('hidden');
+                        if (surveySection) surveySection.classList.remove('hidden');
+                        const field = document.getElementById('shkoje_palester');
+                        if (field) field.focus();
+                    }
+
                     document.getElementById('registerForm').reset();
-                    const field = document.getElementById('shkoje_palester');
-                    if (field) field.focus();
                 });
 
                 // Gym attendance
@@ -1465,7 +1316,23 @@
                     };
                     saveAppState('results');
                     showAlert('✓ Pyetësori u përfundua!', 'success');
-                    displayResults(surveyData);
+
+                    const overlay = document.getElementById('pageTransitionOverlay');
+                    const surveySection = document.getElementById('surveySection');
+
+                    if (overlay && surveySection) {
+                        overlay.classList.add('active');
+                        setTimeout(() => {
+                            surveySection.classList.add('hidden');
+                            displayResults(surveyData);
+                            setTimeout(() => {
+                                overlay.classList.remove('active');
+                            }, 100);
+                        }, 500);
+                    } else {
+                        if (surveySection) surveySection.classList.add('hidden');
+                        displayResults(surveyData);
+                    }
                 });
 
                 // Progress form
