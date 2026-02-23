@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikacioni i Fitnesit</title>
+    <meta name="description" content="Aplikacion për fitness dhe nutricion">
+    <meta name="theme-color" content="#1a1a1a">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Fitness">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    
+    <!-- Android Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .form-section.hidden {
+            display: none;
+        }
+
+        /* Fade overlay for transitions */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 9999;
+        }
+
+        .page-transition-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.8s ease 2.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .splash-logo {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: zoomIn 0.8s ease;
+        }
+
+        .splash-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .splash-text {
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            margin-top: 30px;
+            animation: slideUp 0.8s ease 0.3s both;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        #jsStatus {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            display: none;
+        }
+
+        #jsStatus.ok {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        #jsStatus.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .form-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        button {
+            background: #1a1a1a;
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            background: #000;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .results {
+            display: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            width: auto;
+        }
+
+        .tab-button:hover {
+            color: #1a1a1a;
+            transform: none;
+        }
+
+        .tab-button.active {
+            color: #1a1a1a;
+            border-bottom-color: #1a1a1a;
+        }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: slideInTab 0.4s ease forwards;
+        }
+
+        @keyframes slideInTab {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nutrition-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-top: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nutrition-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .nutrition-card .label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .nutrition-detail {
+            background: white;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1a1a1a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nutrition-detail h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .nutrition-detail p {
+            color: #333;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .nutrition-detail ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .nutrition-detail ul li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 5px 0 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .workout-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #1a1a1a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .workout-item h4 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .muscle-group-title {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-left: 4px solid #1a1a1a;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .exercise-info {
+            padding: 15px;
+        }
+
+        .exercise-info h4 {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .exercise-info p {
+            font-size: 0.85em;
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .exercise-video-box {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            font-size: 0.9em;
+        }
+
+        .exercise-video-box a {
+            color: #1a1a1a;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .exercise-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .exercise-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .reset-btn {
+            background: #fff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #1a1a1a;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            width: auto;
+            padding: 0;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1a1a1a;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item strong {
+            color: #1a1a1a;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .exercise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-logo">
+            <img src="icons/icon-512.png" alt="Fitness Logo">
+        </div>
+        <div class="splash-text">Fitness App</div>
+    </div>
+
+    <!-- Page Transition Overlay -->
+    <div id="pageTransitionOverlay" class="page-transition-overlay"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-logo">
+                <img src="icons/apple-touch-icon.png" alt="Fitness Logo">
+            </div>
+            <h1>💪 Aplikacioni i Fitnesit</h1>
+            <p>Plani juaj i personalizuar për fitness dhe nutricion</p>
+        </div>
+
+        <div id="jsStatus"></div>
+        
+        <button id="resetProfileBtn" class="reset-btn" title="Rivendos profilin dhe rifilloni">
+            🔄 Rifresko Profilin
+        </button>
+
+        <div class="content">
+            <!-- REGISTRATION SECTION -->
+            <div class="form-section" id="registerSection">
+                <h2>📝 Regjistrimi</h2>
+                <form id="registerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Emri</label>
+                            <input type="text" id="emri" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gjinia</label>
+                            <select id="gjinia" required>
+                                <option value="">Zgjidh...</option>
+                                <option value="mashkull">Mashkull</option>
+                                <option value="femer">Femër</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mosha</label>
+                            <input type="number" id="mosha" min="15" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pesha (kg)</label>
+                            <input type="number" id="pesha" step="0.1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lartësia (cm)</label>
+                        <input type="number" id="lartesia" step="0.1" required>
+                    </div>
+
+                    <button type="submit">Regjistrohu</button>
+                </form>
+            </div>
+
+            <!-- SURVEY SECTION -->
+            <div class="form-section hidden" id="surveySection">
+                <h2>📋 Pyetësori</h2>
+                <form id="surveyForm">
+                    <div class="form-group">
+                        <label>A shkoni në palestër?</label>
+                        <select id="shkoje_palester" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="true">Po</option>
+                            <option value="false">Jo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="nivelGroup" style="display: none;">
+                        <label>Cili është niveli juaj i fitnesit?</label>
+                        <select id="niveli_fitnesit">
+                            <option value="">Zgjidh...</option>
+                            <option value="fillestar">Fillestar</option>
+                            <option value="mesatar">Mesatar</option>
+                            <option value="avancuar">Avancuar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cili është qëllimi juaj?</label>
+                        <select id="objektivi" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="bulk">Bulk (Shtim i peshës)</option>
+                            <option value="cut">Cut (Humbje e peshës)</option>
+                            <option value="maintain">Maintain (Ruajtje e peshës)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Aktiviteti ditor</label>
+                        <select id="aktiviteti_ditore" required>
+                            <option value="">Zgjidh...</option>
+                            <option value="i_ulte">I ulte (Sedimented në zyrë)</option>
+                            <option value="lehtesisht_aktiv">Lehtësisht aktiv</option>
+                            <option value="moderatisht_aktiv">Moderatisht aktiv</option>
+                            <option value="shumë_aktiv">Shumë aktiv</option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Përfundoni Pyetësorin</button>
+                </form>
+            </div>
+
+            <!-- RESULTS SECTION -->
+            <div class="results" id="resultsSection">
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="nutrition">🥗 Nutricion</button>
+                    <button class="tab-button" data-tab="workouts">💪 Ushtrimet</button>
+                    <button class="tab-button" data-tab="progress">📊 Përparimi</button>
+                </div>
+
+                <div class="tab-content active" id="nutrition">
+                    <h3>Rekomandimet për Nutricion</h3>
+                    <div id="nutritionResults"></div>
+                </div>
+
+                <div class="tab-content" id="workouts">
+                    <h3>Programi Juaj i Stërvitjes</h3>
+                    <div id="workoutResults"></div>
+                </div>
+
+                <div class="tab-content" id="progress">
+                    <h3>Përparimi</h3>
+                    <div id="progressResults"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div class="exercise-modal" id="exerciseModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeExerciseModal()">&times;</button>
+            <h2 id="modalExerciseName"></h2>
+            <p id="modalExerciseDesc" style="color: #666; margin: 10px 0 20px 0;"></p>
+
+            <div class="nutrition-detail" style="margin-top: 0;">
+                <p><strong>Forma e ushtrimit:</strong></p>
+                <p><a id="modalExerciseVideoLink" href="#" target="_blank" rel="noopener noreferrer">▶ Click here to see how it's done (YouTube)</a></p>
+            </div>
+            
+            <div class="nutrition-detail">
+                <p><strong>Përsëritje të Rekomanduara:</strong> <span id="modalRecommendedReps"></span></p>
+                <p><strong>Setje të Rekomanduara:</strong> <span id="modalRecommendedSets"></span></p>
+            </div>
+
+            <div class="nutrition-detail" id="previousWorkout" style="display: none; background: #f0f0f0;">
+                <h4 style="margin-top: 0;">Sesia e Fundit:</h4>
+                <p><strong>Setje:</strong> <span id="previousSets">-</span></p>
+                <p><strong>Përsëritje:</strong> <span id="previousReps">-</span></p>
+                <p><strong>Pesha:</strong> <span id="previousWeight">-</span> kg</p>
+                <p style="font-size: 0.9em; color: #666;"><strong>Shënim:</strong> <span id="previousNotes">-</span></p>
+            </div>
+
+            <form id="modalProgressForm" style="margin-top: 20px;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Setje të Perfunduara</label>
+                        <input type="number" id="modalSetsCompleted" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Përsëritje</label>
+                        <input type="text" id="modalRepsCompleted" placeholder="p.sh. 10" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Pesha (kg)</label>
+                        <input type="number" id="modalWeightLifted" step="0.5" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Shënime</label>
+                        <input type="text" id="modalNotes" placeholder="Si u ndihesit?">
+                    </div>
+                </div>
+                <button type="submit" style="width: 100%;">Ruaj Progresin</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentUserId = null;
+        let currentPage = 'nutrition';
+        let userData = {};
+        let surveyData = {};
+        let progressHistory = [];
+        let currentDietContext = null;
+        let currentDietVariant = 0;
+        const YOUTUBE_REFERENCE_SHORT = 'https://youtube.com/shorts/_dhyBkytB5w?si=XH1UOs6zdg6iswcC';
+
+        function getExerciseVideoLink(exerciseName) {
+            const name = (exerciseName || '').toLowerCase();
+
+            if (name.includes('leg press')) {
+                return YOUTUBE_REFERENCE_SHORT;
+            }
+
+            const searchQuery = encodeURIComponent(`${exerciseName} proper form shorts`);
+            return `https://www.youtube.com/results?search_query=${searchQuery}`;
+        }
+
+        // Exercise database by level
+        const workoutPlans = {
+            fillestar: {
+                intro: 'Faza e forcimit (6 javë): Java 1-2 fokus teknikë, Java 3-4 rritje graduale peshe, Java 5-6 stabilizim dhe kontroll forme.',
+                groups: {
+                    chest: [
+                        {name: 'Machine Chest Press', reps: '12-15', sets: 3, desc: 'Më e sigurt për fillestarët për forcim bazë të gjoksit', gif: 'https://media.giphy.com/media/3o7TKMoHaErf6Psl5i/giphy.gif'},
+                        {name: 'Incline Push Ups', reps: '10-15', sets: 3, desc: 'Variant i lehtë i push-up për kontroll të mirë të trupit', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'},
+                        {name: 'Dumbbell Floor Press', reps: '10-12', sets: 3, desc: 'Lëvizje e thjeshtë me ROM të kontrolluar', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'}
+                    ],
+                    back: [
+                        {name: 'Seated Cable Row', reps: '12-15', sets: 3, desc: 'Forcon shpinën me stabilitet të lartë', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Lat Pulldowns', reps: '10-12', sets: 3, desc: 'Më i lehtë se pull-up për fillim', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Chest Supported Row', reps: '10-12', sets: 3, desc: 'Redukton ngarkesën në mes për teknikë më të mirë', gif: 'https://media.giphy.com/media/3o7TKYfwCKGnLAPERu/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Goblet Squat', reps: '10-12', sets: 3, desc: 'Variant i sigurt për mësim të squat-it', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Leg Press', reps: '12-15', sets: 3, desc: 'Forcon këmbët pa stres të madh në mes', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
+                        {name: 'Romanian Deadlift (Light DB)', reps: '10-12', sets: 3, desc: 'Forcim i posterior chain me peshë të lehtë', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Machine Shoulder Press', reps: '10-12', sets: 3, desc: 'Më i kontrolluar për fillestarë', gif: 'https://media.giphy.com/media/3o7TKRqe2ILF4GhfnO/giphy.gif'},
+                        {name: 'Lateral Raises (Light)', reps: '12-15', sets: 3, desc: 'Izolim i butë për shpatulla', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Për stabilitet të pjesës së pasme të shpatullës', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ]
+                }
+            },
+            mesatar: {
+                intro: 'Program progresiv mesatar (8 javë): fokus në compound + asistenca për rritje performance.',
+                groups: {
+                    chest: [
+                        {name: 'Dumbbell Bench Press', reps: '8-10', sets: 4, desc: 'Rrit forcën e gjoksit dhe stabilizimin', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
+                        {name: 'Incline Bench Press', reps: '8-10', sets: 3, desc: 'Fokus në pjesën e sipërme të gjoksit', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
+                        {name: 'Cable Flyes', reps: '12-15', sets: 3, desc: 'Izolim për aktivizim më të plotë', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'}
+                    ],
+                    back: [
+                        {name: 'Barbell Rows', reps: '8-10', sets: 4, desc: 'Ushtrim kryesor për trashësi të shpinës', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
+                        {name: 'Assisted Pull Ups', reps: '8-10', sets: 3, desc: 'Kalimi gradual drejt pull-up të lirë', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Balancim i shpatullave dhe posturë', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Back Squat', reps: '6-8', sets: 4, desc: 'Bazë force për këmbët', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Romanian Deadlift', reps: '8-10', sets: 3, desc: 'Fokus në posterior chain', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
+                        {name: 'Leg Curls', reps: '12-15', sets: 3, desc: 'Izolim i hamstrings', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Overhead Press', reps: '6-8', sets: 4, desc: 'Ushtrim kryesor për forcë të shpatullës', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
+                        {name: 'Lateral Raises', reps: '12-15', sets: 3, desc: 'Izolim i deltoidit lateral', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Rear Delt Fly', reps: '12-15', sets: 3, desc: 'Për pjesën e pasme të shpatullës', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'}
+                    ],
+                    biceps: [
+                        {name: 'Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Forcim bilateral i bicepsit', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
+                        {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Izolim i kontrolluar', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
+                    ],
+                    triceps: [
+                        {name: 'Rope Pushdowns', reps: '10-12', sets: 3, desc: 'Ushtrim i sigurt izolues', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
+                        {name: 'Overhead Extension', reps: '10-12', sets: 3, desc: 'Fokus në kokën e gjatë të tricepsit', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
+                    ]
+                }
+            },
+            avancuar: {
+                intro: 'Program avancuar (10-12 javë): compound të rënda + volum i lartë izolimesh për detaje muskulare.',
+                groups: {
+                    chest: [
+                        {name: 'Bench Press', reps: '5-8', sets: 5, desc: 'Compound kryesor për forcë të lartë', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
+                        {name: 'Incline Bench Press', reps: '6-8', sets: 4, desc: 'Ngarkesë e lartë në pjesën e sipërme', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
+                        {name: 'Cable Flyes', reps: '12-15', sets: 4, desc: 'Izolim për pompim dhe tension konstant', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'},
+                        {name: 'Push Ups (Finisher)', reps: 'AMRAP', sets: 2, desc: 'Finisher metabolik', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'}
+                    ],
+                    back: [
+                        {name: 'Weighted Pull Ups', reps: '5-8', sets: 4, desc: 'Compound vertikal për avancuar', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
+                        {name: 'Barbell Rows', reps: '6-8', sets: 4, desc: 'Trashësi e shpinës me ngarkesë të lartë', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
+                        {name: 'Lat Pulldown (Close Grip)', reps: '10-12', sets: 3, desc: 'Izolim për lat dhe kontroll të ROM', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Shëndet i shpatullës dhe posturë', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Back Squat', reps: '4-6', sets: 5, desc: 'Baza e forcës së këmbëve', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Deadlift', reps: '3-5', sets: 4, desc: 'Forcë totale e trupit', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
+                        {name: 'Leg Press', reps: '10-12', sets: 4, desc: 'Volum shtesë për quadriceps', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
+                        {name: 'Leg Curls', reps: '12-15', sets: 4, desc: 'Izolim hamstrings', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'},
+                        {name: 'Calf Raises', reps: '15-20', sets: 4, desc: 'Izolim i pulpave', gif: 'https://media.giphy.com/media/3o7TKXQ0EBquL7aT7q/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Overhead Press', reps: '5-8', sets: 4, desc: 'Compound kryesor për shpatulla', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
+                        {name: 'Lateral Raises', reps: '12-15', sets: 4, desc: 'Izolim lateral për gjerësi', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Front Raises', reps: '12-15', sets: 3, desc: 'Izolim i deltoidit anterior', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'},
+                        {name: 'Rear Delt Fly', reps: '12-15', sets: 4, desc: 'Izolim i deltoidit posterior', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'}
+                    ],
+                    biceps: [
+                        {name: 'Barbell Curls', reps: '8-10', sets: 4, desc: 'Ngarkesë bazë për biceps', gif: 'https://media.giphy.com/media/3o7TKUnOBz0hgvIMjq/giphy.gif'},
+                        {name: 'Incline Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Shtrirje e madhe për kokën e gjatë', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
+                        {name: 'Cable Curls', reps: '12-15', sets: 3, desc: 'Izolim me tension konstant', gif: 'https://media.giphy.com/media/3o7TKTPUXo7xdEgR4Y/giphy.gif'},
+                        {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Izolim final për pompim', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
+                    ],
+                    triceps: [
+                        {name: 'Close Grip Bench Press', reps: '6-8', sets: 4, desc: 'Compound i fortë për triceps', gif: 'https://media.giphy.com/media/3o7TKd1tD0X4ztbMi0/giphy.gif'},
+                        {name: 'Rope Pushdowns', reps: '10-12', sets: 4, desc: 'Izolim kryesor me kontroll', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
+                        {name: 'Skull Crushers', reps: '8-10', sets: 3, desc: 'Izolim i rëndë', gif: 'https://media.giphy.com/media/3o7TKSQdpMXAK64pNu/giphy.gif'},
+                        {name: 'Overhead Extension', reps: '12-15', sets: 3, desc: 'Izolim për kokën e gjatë', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
+                    ],
+                    abs: [
+                        {name: 'Cable Crunches', reps: '12-15', sets: 4, desc: 'Izolim i barkut me ngarkesë', gif: 'https://media.giphy.com/media/3o7TKWPrFdkIPZzZhm/giphy.gif'},
+                        {name: 'Hanging Leg Raises', reps: '10-12', sets: 4, desc: 'Forcë e barkut të poshtëm', gif: 'https://media.giphy.com/media/3o7TKZ9KJM5OmBXdwY/giphy.gif'},
+                        {name: 'Planks', reps: '45-90s', sets: 3, desc: 'Stabilitet i core', gif: 'https://media.giphy.com/media/3o7TKMZTKfBEVVF1dq/giphy.gif'}
+                    ]
+                }
+            }
+        };
+
+        // Load app state
+        function loadAppState() {
+            const savedUser = localStorage.getItem('fitnessAppUser');
+            const savedSurvey = localStorage.getItem('fitnessAppSurvey');
+            const savedProgress = localStorage.getItem('fitnessAppProgress');
+            const savedPage = localStorage.getItem('fitnessAppPage');
+
+            const registerSection = document.getElementById('registerSection');
+            const surveySection = document.getElementById('surveySection');
+            const resultsSection = document.getElementById('resultsSection');
+
+            const setFreshState = () => {
+                if (resultsSection) resultsSection.classList.remove('show');
+                if (surveySection) surveySection.classList.add('hidden');
+                if (registerSection) registerSection.classList.remove('hidden');
+            };
+
+            const isValidUser = (data) => {
+                if (!data) return false;
+                return Boolean(data.emri) && Boolean(data.gjinia) &&
+                    Number.isFinite(data.mosha) && Number.isFinite(data.pesha) && Number.isFinite(data.lartesia);
+            };
+
+            const isValidSurvey = (data) => {
+                if (!data) return false;
+                return typeof data.shkoje_palester === 'boolean' &&
+                    Boolean(data.objektivi) && Boolean(data.aktiviteti_ditore);
+            };
+
+            if (savedUser) {
+                userData = JSON.parse(savedUser);
+                if (!isValidUser(userData)) {
+                    localStorage.removeItem('fitnessAppUser');
+                    localStorage.removeItem('fitnessAppUserId');
+                    localStorage.removeItem('fitnessAppSurvey');
+                    localStorage.removeItem('fitnessAppProgress');
+                    localStorage.removeItem('fitnessAppPage');
+                    userData = {};
+                    surveyData = {};
+                    progressHistory = [];
+                    setFreshState();
+                    return;
+                }
+
+                currentUserId = localStorage.getItem('fitnessAppUserId');
+                if (registerSection) registerSection.classList.add('hidden');
+
+                if (savedSurvey) {
+                    surveyData = JSON.parse(savedSurvey);
+                    if (isValidSurvey(surveyData)) {
+                        if (surveySection) surveySection.classList.add('hidden');
+                        if (resultsSection) resultsSection.classList.add('show');
+                        displayResults(surveyData);
+                    } else {
+                        localStorage.removeItem('fitnessAppSurvey');
+                        if (resultsSection) resultsSection.classList.remove('show');
+                        if (surveySection) surveySection.classList.remove('hidden');
+                    }
+
+                    if (savedPage) {
+                        currentPage = savedPage;
+                        setTimeout(() => restoreActiveTab(savedPage), 100);
+                    }
+                } else {
+                    if (surveySection) surveySection.classList.remove('hidden');
+                }
+            } else {
+                setFreshState();
+            }
+
+            if (savedProgress) {
+                progressHistory = JSON.parse(savedProgress);
+            }
+        }
+
+        // Save app state
+        function saveAppState(page) {
+            localStorage.setItem('fitnessAppUser', JSON.stringify(userData));
+            localStorage.setItem('fitnessAppUserId', currentUserId);
+            localStorage.setItem('fitnessAppSurvey', JSON.stringify(surveyData));
+            localStorage.setItem('fitnessAppProgress', JSON.stringify(progressHistory));
+            localStorage.setItem('fitnessAppPage', page);
+        }
+
+        // Reset profile: clears local storage and returns to registration
+        function resetProfile() {
+            if (!confirm('Doni të rifreskoni profilin dhe të filloni nga e para? Të gjitha të dhënat lokale do të fshihen.')) return;
+            localStorage.removeItem('fitnessAppUser');
+            localStorage.removeItem('fitnessAppUserId');
+            localStorage.removeItem('fitnessAppSurvey');
+            localStorage.removeItem('fitnessAppProgress');
+            localStorage.removeItem('fitnessAppPage');
+
+            currentUserId = null;
+            userData = {};
+            surveyData = {};
+            progressHistory = [];
+            currentPage = 'nutrition';
+
+            // UI reset
+            const reg = document.getElementById('registerSection');
+            const surv = document.getElementById('surveySection');
+            const res = document.getElementById('resultsSection');
+            
+            if (res) res.classList.remove('show');
+            if (surv) surv.classList.add('hidden');
+            if (reg) reg.classList.remove('hidden');
+
+            const rf = document.getElementById('registerForm');
+            if (rf) rf.reset();
+
+            showAlert('Profil u rifreskua. Ju lutem regjistrohuni përsëri.', 'success');
+            saveAppState(currentPage);
+        }
+
+        // Update JS status
+        function updateJsStatus(message, ok) {
+            const el = document.getElementById('jsStatus');
+            if (!el) return;
+            el.textContent = 'JS: ' + message;
+            el.className = ok ? 'ok' : 'error';
+            el.style.display = 'block';
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type;
+            alertDiv.textContent = message;
+            const content = document.querySelector('.content');
+            if (content) {
+                content.insertBefore(alertDiv, content.firstChild);
+            }
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        // Restore active tab
+        function restoreActiveTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const btn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+            const content = document.getElementById(tabName);
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.add('active');
+            if (tabName === 'progress') displayProgress();
+        }
+
+        // Calculate nutrition
+        function calculateNutrition(mosha, pesha, lartesia, gjinia, aktiviteti, objektivi) {
+            const isMale = gjinia === 'mashkull';
+
+            // Mifflin-St Jeor (zakonisht më realist për shumicën e përdoruesve)
+            const BMR = isMale
+                ? (10 * pesha) + (6.25 * lartesia) - (5 * mosha) + 5
+                : (10 * pesha) + (6.25 * lartesia) - (5 * mosha) - 161;
+
+            const AKS = {
+                'i_ulte': 1.2,
+                'lehtesisht_aktiv': 1.375,
+                'moderatisht_aktiv': 1.5,
+                'shumë_aktiv': 1.65
+            };
+
+            const activityFactor = AKS[aktiviteti] || 1.375;
+            const TDEE = BMR * activityFactor;
+
+            let kalori_final = TDEE;
+            if (objektivi === 'bulk') {
+                kalori_final = TDEE + 200;
+            } else if (objektivi === 'cut') {
+                kalori_final = TDEE - 300;
+            }
+
+            // Mbrojtje minimale për të mos zbritur shumë poshtë
+            kalori_final = Math.max(kalori_final, BMR * 1.1);
+
+            // Makro më realiste sipas peshës (g/kg), jo përqindje fikse shumë të larta
+            const proteinPerKg = objektivi === 'cut' ? 2.0 : (objektivi === 'bulk' ? 1.8 : 1.7);
+            const fatPerKg = objektivi === 'cut' ? 0.8 : (objektivi === 'bulk' ? 0.9 : 0.85);
+
+            const proteine = Math.round(pesha * proteinPerKg);
+            const yndyre = Math.round(pesha * fatPerKg);
+
+            const caloriesFromProtein = proteine * 4;
+            const caloriesFromFat = yndyre * 9;
+            const remainingCalories = Math.max(kalori_final - caloriesFromProtein - caloriesFromFat, pesha * 2 * 4);
+            const karbohidrate = Math.round(remainingCalories / 4);
+
+            const totalCaloriesFromMacros = (proteine * 4) + (karbohidrate * 4) + (yndyre * 9);
+            const proteine_percent = (proteine * 4) / totalCaloriesFromMacros;
+            const carbs_percent = (karbohidrate * 4) / totalCaloriesFromMacros;
+            const fat_percent = (yndyre * 9) / totalCaloriesFromMacros;
+
+            return {
+                BMR: Math.round(BMR),
+                TDEE: Math.round(TDEE),
+                kalori_final: Math.round(totalCaloriesFromMacros),
+                proteine,
+                karbohidrate,
+                yndyre,
+                proteine_percent: Math.round(proteine_percent * 100),
+                carbs_percent: Math.round(carbs_percent * 100),
+                fat_percent: Math.round(fat_percent * 100)
+            };
+        }
+
+        function getDietTemplates(objective) {
+            if (objective === 'cut') {
+                return {
+                    note: 'Deficit i moderuar, proteinë e lartë dhe ushqime me densitet të ulët kalorik.',
+                    breakfast: [
+                        '2 vezë + {oats}g tërshërë + 1 kos i thjeshtë',
+                        'Omletë me 3 të bardha + 1 vezë + 1 fetë bukë integrale + 1 frut',
+                        '{oats}g overnight oats me kos të lehtë + manaferra'
+                    ],
+                    lunch: [
+                        '{proteinLean}g fileto pule + {riceSmall}g oriz i zier + sallatë e madhe',
+                        '{proteinLean}g ton/peshk i bardhë + {potatoSmall}g patate të pjekura + perime',
+                        '{proteinLean}g mish viçi i ligët + {riceSmall}g bulgur + sallatë'
+                    ],
+                    snack: [
+                        '1 kos proteinik + 1 mollë + {nutsSmall}g bajame',
+                        '1 shake proteine + 1 portokall',
+                        'Gjizë e lehtë + 1 frut'
+                    ],
+                    dinner: [
+                        '{proteinLean}g peshk + perime të avulluara + {potatoSmall}g patate',
+                        '{proteinLean}g pule + sallatë + 1 lugë çaji vaj ulliri',
+                        '{proteinLean}g turkey + brokoli + {riceSmall}g oriz'
+                    ]
+                };
+            }
+
+            if (objective === 'bulk') {
+                return {
+                    note: 'Surplus i kontrolluar me fokus në performance dhe rikuperim.',
+                    breakfast: [
+                        '3 vezë + {oatsHigh}g tërshërë + 1 banane + {nutsMedium}g gjalpë kikiriku',
+                        'Omletë me 3 vezë + 2 feta bukë integrale + 1 kos',
+                        '{oatsHigh}g tërshërë me qumësht + mjaltë + 1 banane'
+                    ],
+                    lunch: [
+                        '{proteinHigh}g mish pule/viçi + {riceHigh}g oriz + sallatë + 1 lugë gjelle vaj ulliri',
+                        '{proteinHigh}g salmon + {potatoHigh}g patate + perime',
+                        '{proteinHigh}g mish i ligët + {riceHigh}g makarona integrale'
+                    ],
+                    snack: [
+                        '1 shake proteine + 2 feta bukë integrale + {nutsMedium}g arra',
+                        'Kos i trashë + granola + banane',
+                        'Sanduiç integral me ton + frut'
+                    ],
+                    dinner: [
+                        '{proteinHigh}g peshk/mish i ligët + {potatoHigh}g patate ose makarona + sallatë',
+                        '{proteinHigh}g pule + {riceHigh}g oriz + perime',
+                        '{proteinHigh}g viç i ligët + quinoa + perime'
+                    ]
+                };
+            }
+
+            return {
+                note: 'Mirëmbajtje peshe me vakte të balancuara dhe energji stabile gjatë ditës.',
+                breakfast: [
+                    '2 vezë + {oats}g tërshërë + 1 frut',
+                    'Kos i trashë + tërshërë + fruta pylli',
+                    'Omletë me 2 vezë + 1 fetë bukë integrale + domate'
+                ],
+                lunch: [
+                    '{proteinMed}g pule/peshk + {riceMed}g oriz i zier + sallatë',
+                    '{proteinMed}g mish i ligët + {potatoMed}g patate + perime',
+                    '{proteinMed}g peshk + quinoa + sallatë jeshile'
+                ],
+                snack: [
+                    '1 kos + {nutsSmall}g arra/bajame + 1 frut',
+                    '1 shake proteine + 1 frut',
+                    'Gjizë + fara chia + fruta'
+                ],
+                dinner: [
+                    '{proteinMed}g mish i ligët + {potatoMed}g patate + perime të gjelbra',
+                    '{proteinMed}g peshk + oriz + sallatë',
+                    '{proteinMed}g pule + perime të pjekura + 1 lugë çaji vaj ulliri'
+                ]
+            };
+        }
+
+        function fillDietTemplate(template, portions) {
+            return template
+                .replaceAll('{oats}', portions.oats)
+                .replaceAll('{oatsHigh}', portions.oatsHigh)
+                .replaceAll('{proteinLean}', portions.proteinLean)
+                .replaceAll('{proteinMed}', portions.proteinMed)
+                .replaceAll('{proteinHigh}', portions.proteinHigh)
+                .replaceAll('{riceSmall}', portions.riceSmall)
+                .replaceAll('{riceMed}', portions.riceMed)
+                .replaceAll('{riceHigh}', portions.riceHigh)
+                .replaceAll('{potatoSmall}', portions.potatoSmall)
+                .replaceAll('{potatoMed}', portions.potatoMed)
+                .replaceAll('{potatoHigh}', portions.potatoHigh)
+                .replaceAll('{nutsSmall}', portions.nutsSmall)
+                .replaceAll('{nutsMedium}', portions.nutsMedium);
+        }
+
+        function buildWeeklyDietHTML(context, variantIndex) {
+            const { userData, surveyData, nutrition } = context;
+            const personName = userData.emri || 'Ju';
+            const objective = surveyData.objektivi || 'maintain';
+            const templates = getDietTemplates(objective);
+            const scale = Math.max(0.8, Math.min(1.35, nutrition.kalori_final / 2200));
+
+            const portions = {
+                oats: Math.round(55 * scale),
+                oatsHigh: Math.round(72 * scale),
+                proteinLean: Math.round(160 * scale),
+                proteinMed: Math.round(175 * scale),
+                proteinHigh: Math.round(205 * scale),
+                riceSmall: Math.round(115 * scale),
+                riceMed: Math.round(145 * scale),
+                riceHigh: Math.round(185 * scale),
+                potatoSmall: Math.round(130 * scale),
+                potatoMed: Math.round(165 * scale),
+                potatoHigh: Math.round(220 * scale),
+                nutsSmall: Math.round(15 * scale),
+                nutsMedium: Math.round(22 * scale)
+            };
+
+            const days = ['E Hënë', 'E Martë', 'E Mërkurë', 'E Enjte', 'E Premte', 'E Shtunë', 'E Diel'];
+            let planHTML = `
+                <div class="nutrition-detail">
+                    <h4>🍽️ Dietë Javore e Personalizuar për ${personName}</h4>
+                    <p><strong>Objektivi:</strong> ${objective}</p>
+                    <p><strong>Kalori target:</strong> ~${nutrition.kalori_final} kcal/ditë</p>
+                    <p><strong>Shënim:</strong> ${templates.note}</p>
+                    <p><strong>Ujë:</strong> 30-35 ml/kg peshë trupore/ditë</p>
+                </div>
+            `;
+
+            days.forEach((dayName, dayIndex) => {
+                const b = fillDietTemplate(templates.breakfast[(dayIndex + variantIndex) % templates.breakfast.length], portions);
+                const l = fillDietTemplate(templates.lunch[(dayIndex + variantIndex) % templates.lunch.length], portions);
+                const s = fillDietTemplate(templates.snack[(dayIndex + variantIndex) % templates.snack.length], portions);
+                const d = fillDietTemplate(templates.dinner[(dayIndex + variantIndex) % templates.dinner.length], portions);
+
+                planHTML += `
+                    <div class="nutrition-detail">
+                        <h4>📅 ${dayName}</h4>
+                        <p><strong>Mëngjes:</strong> ${b}</p>
+                        <p><strong>Drekë:</strong> ${l}</p>
+                        <p><strong>Snack:</strong> ${s}</p>
+                        <p><strong>Darkë:</strong> ${d}</p>
+                    </div>
+                `;
+            });
+
+            return planHTML;
+        }
+
+        function regenerateDietPlan() {
+            if (!currentDietContext) return;
+            currentDietVariant += 1;
+            const container = document.getElementById('weeklyDietContainer');
+            if (!container) return;
+            container.innerHTML = buildWeeklyDietHTML(currentDietContext, currentDietVariant);
+        }
+
+        // Display results
+        function displayResults(surveyData) {
+            const isValidNumber = (value) => Number.isFinite(value);
+            const hasValidUser = userData &&
+                isValidNumber(userData.mosha) &&
+                isValidNumber(userData.pesha) &&
+                isValidNumber(userData.lartesia) &&
+                Boolean(userData.gjinia);
+
+            const hasValidSurvey = surveyData &&
+                typeof surveyData.shkoje_palester === 'boolean' &&
+                Boolean(surveyData.objektivi) &&
+                Boolean(surveyData.aktiviteti_ditore);
+
+            if (!hasValidUser || !hasValidSurvey) {
+                showAlert('Të dhënat nuk janë të plota. Ju lutem plotësoni formularin përsëri.', 'error');
+                resetProfile();
+                return;
+            }
+
+            const registerSection = document.getElementById('registerSection');
+            const surveySection = document.getElementById('surveySection');
+            if (registerSection) registerSection.classList.add('hidden');
+            if (surveySection) surveySection.classList.add('hidden');
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.add('show');
+
+            const nutrition = calculateNutrition(
+                userData.mosha, userData.pesha, userData.lartesia,
+                userData.gjinia, surveyData.aktiviteti_ditore, surveyData.objektivi
+            );
+
+            let nutritionHTML = `
+                <div class="nutrition-grid">
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.kalori_final}</div>
+                        <div class="label">Kalori/Ditë</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.proteine}g</div>
+                        <div class="label">Proteinat (${nutrition.proteine_percent}%)</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.karbohidrate}g</div>
+                        <div class="label">Karbohidrate (${nutrition.carbs_percent}%)</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <div class="value">${nutrition.yndyre}g</div>
+                        <div class="label">Yndyra (${nutrition.fat_percent}%)</div>
+                    </div>
+                </div>
+                <div class="nutrition-detail">
+                    <h4>📊 Analiza e Dhuruara Tuaja</h4>
+                    <p><strong>Mosha:</strong> ${userData.mosha} vjet</p>
+                    <p><strong>Pesha:</strong> ${userData.pesha} kg</p>
+                    <p><strong>Lartësia:</strong> ${userData.lartesia} cm</p>
+                    <p><strong>BMI:</strong> ${(userData.pesha / ((userData.lartesia/100) ** 2)).toFixed(1)}</p>
+                </div>
+                <div class="nutrition-detail">
+                    <h4>🔥 Llogaritjet e Energjisë</h4>
+                    <p><strong>BMR:</strong> ${nutrition.BMR} kalori/ditë</p>
+                    <p><strong>TDEE:</strong> ${nutrition.TDEE} kalori/ditë</p>
+                    <p><strong>Kalori të Rekomanduara:</strong> ${nutrition.kalori_final} kalori/ditë</p>
+                </div>
+            `;
+
+            currentDietContext = {
+                userData: { ...userData },
+                surveyData: { ...surveyData },
+                nutrition: { ...nutrition }
+            };
+            currentDietVariant = 0;
+
+            nutritionHTML += `
+                <div id="weeklyDietContainer">${buildWeeklyDietHTML(currentDietContext, currentDietVariant)}</div>
+                <button type="button" onclick="regenerateDietPlan()" style="margin-top: 12px;">🔁 Ndrysho Dietën Javore</button>
+            `;
+            document.getElementById('nutritionResults').innerHTML = nutritionHTML;
+
+            let workoutHTML = '';
+            if (surveyData.shkoje_palester) {
+                const groupNames = {chest: '💪 Gjoksi', back: '🔙 Shpinda', legs: '🦵 Këmbë', shoulders: '💪 Shpatulla', biceps: '💪 Biceps', triceps: '💪 Triceps', abs: '🤐 Barkushte'};
+
+                const levelKey = surveyData.niveli_fitnesit || 'fillestar';
+                const selectedPlan = workoutPlans[levelKey] || workoutPlans.fillestar;
+                const groups = Object.keys(selectedPlan.groups);
+
+                workoutHTML = `
+                    <div class="workout-item">
+                        <h4>Niveli: ${levelKey.charAt(0).toUpperCase() + levelKey.slice(1)}</h4>
+                        <p style="margin-top:8px; color:#555;">${selectedPlan.intro}</p>
+                    </div>
+                `;
+
+                groups.forEach(group => {
+                    workoutHTML += `<div class="muscle-group-title">${groupNames[group]}</div><div class="exercise-grid">`;
+                    selectedPlan.groups[group].forEach(ex => {
+                        const videoUrl = getExerciseVideoLink(ex.name);
+                        workoutHTML += `
+                            <div class="exercise-card" onclick="openExerciseModal('${ex.name}', '${ex.desc}', '${ex.reps}', '${ex.sets}', '${videoUrl}')">
+                                <div class="exercise-info">
+                                    <h4>${ex.name}</h4>
+                                    <p><strong>Përsëritje:</strong> ${ex.reps}</p>
+                                    <p><strong>Setje:</strong> ${ex.sets}</p>
+                                    <p>${ex.desc}</p>
+                                    <div class="exercise-video-box">▶ <a href="${videoUrl}" target="_blank" rel="noopener noreferrer">Click here to see how it's done</a></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    workoutHTML += `</div>`;
+                });
+            } else {
+                workoutHTML = `<div class="workout-item"><h4>📌 Aktivitete Fizike</h4><ul><li>🏃 Vrapim: 30-45 min, 3x/javë</li><li>🚴 Ecje: 45-60 min, 5x/javë</li><li>🚲 Biking: 45 min, 2-3x/javë</li><li>🏊 Notim: 30-45 min, 2-3x/javë</li></ul></div>`;
+            }
+            document.getElementById('workoutResults').innerHTML = workoutHTML;
+        }
+
+        // Display progress
+        function displayProgress() {
+            let html = '';
+            if (progressHistory.length === 0) {
+                html = '<p style="color: #999;">Nuk ka përparimi të regjistruar ende.</p>';
+            } else {
+                // Grupo ushtrimet sipas emrit
+                const exerciseGroups = {};
+                progressHistory.forEach(entry => {
+                    if (!exerciseGroups[entry.emri_ushtrimit]) {
+                        exerciseGroups[entry.emri_ushtrimit] = [];
+                    }
+                    exerciseGroups[entry.emri_ushtrimit].push(entry);
+                });
+
+                // Shfaq çdo ushtrimi me historikun e tij
+                Object.keys(exerciseGroups).sort().forEach(exerciseName => {
+                    const sessions = exerciseGroups[exerciseName].sort((a, b) => 
+                        new Date(a.data) - new Date(b.data)
+                    );
+
+                    // Përllogaris statistikat
+                    const firstSession = sessions[0];
+                    const lastSession = sessions[sessions.length - 1];
+                    const totalSessions = sessions.length;
+                    
+                    const weightProgress = lastSession.pesha_zgjedhur - firstSession.pesha_zgjedhur;
+                    const volumeFirst = firstSession.setje_perfunduar * firstSession.repetisione_perfunduar * firstSession.pesha_zgjedhur;
+                    const volumeLast = lastSession.setje_perfunduar * lastSession.repetisione_perfunduar * lastSession.pesha_zgjedhur;
+                    const volumeProgress = volumeLast - volumeFirst;
+
+                    html += `
+                        <div class="result-item" style="margin-bottom: 20px; border-left: 4px solid #1a1a1a; padding-left: 12px;">
+                            <strong style="font-size: 1.1em; color: #1a1a1a;">${exerciseName}</strong>
+                            <div style="margin: 8px 0; padding: 8px; background: rgba(26, 26, 26, 0.05); border-radius: 6px;">
+                                <strong>📊 Përmbledhje:</strong> ${totalSessions} seance${totalSessions > 1 ? '' : ''}
+                                ${weightProgress !== 0 ? `<br><strong>Progresion pesha:</strong> ${weightProgress > 0 ? '+' : ''}${weightProgress}kg` : ''}
+                                ${volumeProgress !== 0 ? `<br><strong>Progresion vëllim:</strong> ${volumeProgress > 0 ? '+' : ''}${volumeProgress.toFixed(0)}kg total` : ''}
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <strong>📅 Historik seancash:</strong>
+                    `;
+
+                    // Lista e seancave (nga më e reja tek më e vjetra)
+                    sessions.slice().reverse().forEach((entry, idx) => {
+                        const date = new Date(entry.data).toLocaleDateString('sq-AL', { 
+                            day: 'numeric', month: 'short', year: 'numeric' 
+                        });
+                        const isLatest = idx === 0;
+                        const isPR = sessions.every(s => 
+                            s === entry || s.pesha_zgjedhur <= entry.pesha_zgjedhur
+                        );
+                        
+                        html += `
+                            <div style="margin: 6px 0; padding: 8px; background: ${isLatest ? 'rgba(102, 206, 135, 0.1)' : 'rgba(0,0,0,0.02)'}; border-radius: 4px;">
+                                <span style="color: #999; font-size: 0.85em;">${date}</span>
+                                ${isLatest ? '<span style="background: #66ce87; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">E fundit</span>' : ''}
+                                ${isPR && sessions.length > 1 ? '<span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; margin-left: 6px;">PR</span>' : ''}
+                                <br>
+                                <strong>${entry.setje_perfunduar}</strong> setje × <strong>${entry.repetisione_perfunduar}</strong> reps @ <strong>${entry.pesha_zgjedhur}kg</strong>
+                                <span style="color: #999; font-size: 0.85em; margin-left: 8px;">(Vëllim: ${(entry.setje_perfunduar * entry.repetisione_perfunduar * entry.pesha_zgjedhur).toFixed(0)}kg)</span>
+                                ${entry.shenime ? `<br><em style="color: #1a1a1a; font-size: 0.9em;">💬 ${entry.shenime}</em>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('progressResults').innerHTML = html;
+        }
+
+        // Modal functions
+        function openExerciseModal(name, desc, reps, sets, videoLink) {
+            document.getElementById('modalExerciseName').textContent = name;
+            document.getElementById('modalExerciseName').dataset.exerciseName = name;
+            document.getElementById('modalExerciseDesc').textContent = desc;
+            document.getElementById('modalRecommendedReps').textContent = reps;
+            document.getElementById('modalRecommendedSets').textContent = sets;
+            document.getElementById('modalExerciseVideoLink').href = videoLink || getExerciseVideoLink(name);
+            
+            const prev = progressHistory.filter(e => e.emri_ushtrimit === name).pop();
+            if (prev) {
+                document.getElementById('previousWorkout').style.display = 'block';
+                document.getElementById('previousSets').textContent = prev.setje_perfunduar;
+                document.getElementById('previousReps').textContent = prev.repetisione_perfunduar;
+                document.getElementById('previousWeight').textContent = prev.pesha_zgjedhur;
+                document.getElementById('previousNotes').textContent = prev.shenime || '-';
+            } else {
+                document.getElementById('previousWorkout').style.display = 'none';
+            }
+            
+            document.getElementById('exerciseModal').classList.add('show');
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exerciseModal').classList.remove('show');
+            document.getElementById('modalProgressForm').reset();
+        }
+
+        function runPageTransition(fromSection, toSection, onAfter) {
+            const overlay = document.getElementById('pageTransitionOverlay');
+            const switchPages = () => {
+                if (fromSection) fromSection.classList.add('hidden');
+                if (toSection) toSection.classList.remove('hidden');
+                if (typeof onAfter === 'function') onAfter();
+            };
+
+            if (!overlay) {
+                switchPages();
+                return;
+            }
+
+            overlay.classList.add('active');
+            setTimeout(() => {
+                switchPages();
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 150);
+            }, 500);
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            try {
+                // Register form
+                document.getElementById('registerForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    userData = {
+                        emri: document.getElementById('emri').value,
+                        gjinia: document.getElementById('gjinia').value,
+                        mosha: parseInt(document.getElementById('mosha').value),
+                        pesha: parseFloat(document.getElementById('pesha').value),
+                        lartesia: parseFloat(document.getElementById('lartesia').value)
+                    };
+                    
+                    currentUserId = 'user_' + Date.now();
+                    currentPage = 'survey';
+                    saveAppState('survey');
+                    
+                    showAlert('✓ Regjistrimi u përfundua me sukses!', 'success');
+
+                    const registerSection = document.getElementById('registerSection');
+                    const surveySection = document.getElementById('surveySection');
+                    runPageTransition(registerSection, surveySection, () => {
+                        const field = document.getElementById('shkoje_palester');
+                        if (field) field.focus();
+                    });
+
+                    document.getElementById('registerForm').reset();
+                });
+
+                // Gym attendance
+                document.getElementById('shkoje_palester').addEventListener('change', (e) => {
+                    const nivelGroup = document.getElementById('nivelGroup');
+                    if (e.target.value === 'true') {
+                        nivelGroup.style.display = 'block';
+                        document.getElementById('niveli_fitnesit').required = true;
+                    } else {
+                        nivelGroup.style.display = 'none';
+                        document.getElementById('niveli_fitnesit').required = false;
+                    }
+                });
+
+                // Survey form
+                document.getElementById('surveyForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    surveyData = {
+                        shkoje_palester: document.getElementById('shkoje_palester').value === 'true',
+                        niveli_fitnesit: document.getElementById('niveli_fitnesit').value || 'fillestar',
+                        objektivi: document.getElementById('objektivi').value,
+                        aktiviteti_ditore: document.getElementById('aktiviteti_ditore').value
+                    };
+                    saveAppState('results');
+                    showAlert('✓ Pyetësori u përfundua!', 'success');
+
+                    const surveySection = document.getElementById('surveySection');
+                    runPageTransition(surveySection, null, () => {
+                        displayResults(surveyData);
+                        window.scrollTo(0, 0);
+                    });
+                });
+
+                // Progress form (optional - if present)
+                const logProgressForm = document.getElementById('logProgressForm');
+                if (logProgressForm) {
+                    logProgressForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const entry = {
+                            emri_ushtrimit: document.getElementById('exercise_name').value,
+                            setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
+                            repetisione_perfunduar: document.getElementById('reps_completed').value,
+                            pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
+                            shenime: document.getElementById('notes').value,
+                            data: new Date().toISOString()
+                        };
+                        progressHistory.push(entry);
+                        saveAppState('progress');
+                        showAlert('✓ Përparimi u regjistrua!', 'success');
+                        logProgressForm.reset();
+                        displayProgress();
+                    });
+                }
+
+                // Tab buttons
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const tab = btn.dataset.tab;
+                        currentPage = tab;
+                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        btn.classList.add('active');
+                        document.getElementById(tab).classList.add('active');
+                        saveAppState(tab);
+                        if (tab === 'progress') displayProgress();
+                    });
+                });
+
+                // Modal form
+                document.getElementById('modalProgressForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('modalExerciseName').dataset.exerciseName;
+                    const entry = {
+                        emri_ushtrimit: name,
+                        setje_perfunduar: parseInt(document.getElementById('modalSetsCompleted').value),
+                        repetisione_perfunduar: document.getElementById('modalRepsCompleted').value,
+                        pesha_zgjedhur: parseFloat(document.getElementById('modalWeightLifted').value),
+                        shenime: document.getElementById('modalNotes').value,
+                        data: new Date().toISOString()
+                    };
+                    progressHistory.push(entry);
+                    saveAppState(currentPage);
+                    showAlert('✓ Përparimi u regjistrua!', 'success');
+                    closeExerciseModal();
+                    if (currentPage === 'progress') displayProgress();
+                });
+
+                // Modal close
+                document.getElementById('exerciseModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'exerciseModal') closeExerciseModal();
+                });
+
+                // Reset profile button
+                const resetBtn = document.getElementById('resetProfileBtn');
+                if (resetBtn) resetBtn.addEventListener('click', resetProfile);
+
+            } catch (err) {
+                updateJsStatus('Error: ' + err.message, false);
+                console.error('initializeEventListeners:', err);
+            }
+        }
+
+        // Page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Hide splash screen after 3 seconds
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splashScreen');
+                if (splashScreen) {
+                    splashScreen.style.display = 'none';
+                }
+            }, 3000);
+
+            loadAppState();
+            initializeEventListeners();
+
+            // Force-clear old service workers/caches to avoid stale deployed versions
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations()
+                    .then((registrations) => Promise.all(registrations.map((r) => r.unregister())))
+                    .then(() => caches.keys())
+                    .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+                    .catch(() => {});
+            }
+        });
+
+        // Handle global errors
+        window.addEventListener('error', (e) => {
+            updateJsStatus('Error: ' + (e.message || 'unknown'), false);
+        });
+    </script>
+</body>
+</html>
