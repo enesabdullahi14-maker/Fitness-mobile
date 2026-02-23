@@ -466,25 +466,6 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
-        .exercise-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3em;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .exercise-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
         .exercise-info {
             padding: 15px;
         }
@@ -500,6 +481,21 @@
             color: #666;
             margin: 5px 0;
             line-height: 1.4;
+        }
+
+        .exercise-video-box {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            border: 1px solid #e5e5e5;
+            font-size: 0.9em;
+        }
+
+        .exercise-video-box a {
+            color: #1a1a1a;
+            font-weight: 600;
+            text-decoration: underline;
         }
 
         .exercise-modal {
@@ -749,33 +745,6 @@
 
                 <div class="tab-content" id="progress">
                     <h3>Përparimi</h3>
-                    <form id="logProgressForm" style="margin-bottom: 20px;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Emri i ushtrimit</label>
-                                <input type="text" id="exercise_name" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Setje të Perfunduara</label>
-                                <input type="number" id="sets_completed" min="1" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Përsëritje</label>
-                                <input type="text" id="reps_completed" placeholder="p.sh. 10" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Pesha (kg)</label>
-                                <input type="number" id="weight_lifted" step="0.5" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Shënime</label>
-                            <input type="text" id="notes" placeholder="Si u ndihesit?">
-                        </div>
-                        <button type="submit">Regjistro Progresin</button>
-                    </form>
                     <div id="progressResults"></div>
                 </div>
             </div>
@@ -786,9 +755,13 @@
     <div class="exercise-modal" id="exerciseModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeExerciseModal()">&times;</button>
-            <img id="modalImage" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;">
             <h2 id="modalExerciseName"></h2>
             <p id="modalExerciseDesc" style="color: #666; margin: 10px 0 20px 0;"></p>
+
+            <div class="nutrition-detail" style="margin-top: 0;">
+                <p><strong>Forma e ushtrimit:</strong></p>
+                <p><a id="modalExerciseVideoLink" href="#" target="_blank" rel="noopener noreferrer">▶ Click here to see how it's done (YouTube)</a></p>
+            </div>
             
             <div class="nutrition-detail">
                 <p><strong>Përsëritje të Rekomanduara:</strong> <span id="modalRecommendedReps"></span></p>
@@ -836,54 +809,128 @@
         let userData = {};
         let surveyData = {};
         let progressHistory = [];
+        let currentDietContext = null;
+        let currentDietVariant = 0;
+        const YOUTUBE_REFERENCE_SHORT = 'https://youtube.com/shorts/_dhyBkytB5w?si=XH1UOs6zdg6iswcC';
 
-        // Exercise database
-        const exercisesDatabase = {
-            chest: [
-                {name: 'Bench Press', reps: '8-10', sets: 3, desc: 'Ushtrimi më bazik për gjoksin', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
-                {name: 'Incline Bench Press', reps: '8-10', sets: 3, desc: 'Për pjesën e sipërme të gjoksit', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
-                {name: 'Dumbbell Chest Press', reps: '10-12', sets: 3, desc: 'Ushtrim me pesha për frekuencë më të madhe', gif: 'https://media.giphy.com/media/3o7TKMoHaErf6Psl5i/giphy.gif'},
-                {name: 'Push Ups', reps: '12-15', sets: 3, desc: 'Ushtrim me peshë të trupit', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'},
-                {name: 'Cable Flyes', reps: '12-15', sets: 3, desc: 'Ushtrimi i izolimit për gjoksin', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'}
-            ],
-            back: [
-                {name: 'Barbell Rows', reps: '6-8', sets: 3, desc: 'Ushtrimi themelor për shpatin', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
-                {name: 'Pull Ups', reps: '6-10', sets: 3, desc: 'Ngjitje në shufër për shpatin', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
-                {name: 'Dumbbell Rows', reps: '10-12', sets: 3, desc: 'Variacion më fleksibël për shpatin', gif: 'https://media.giphy.com/media/3o7TKYfwCKGnLAPERu/giphy.gif'},
-                {name: 'Lat Pulldowns', reps: '8-12', sets: 3, desc: 'Në makinë - më i lehtë për fillestarët', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
-                {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Për pjesën e pasme të shpateve', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
-            ],
-            legs: [
-                {name: 'Squats', reps: '6-8', sets: 3, desc: 'Më i rëndësishmi për të punuar të gjithë këmbën', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
-                {name: 'Deadlifts', reps: '3-6', sets: 3, desc: 'Fuqia - pozicion shumë i rëndësishëm', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
-                {name: 'Leg Press', reps: '8-12', sets: 3, desc: 'Në makinë - më i sigurt për fillestarët', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
-                {name: 'Leg Curls', reps: '10-15', sets: 3, desc: 'Ushtrimi i izolimit për muskujt e pasme të cokës', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'},
-                {name: 'Calf Raises', reps: '15-20', sets: 3, desc: 'Për ndërtimin e muskujve të këmbëve të poshtme', gif: 'https://media.giphy.com/media/3o7TKXQ0EBquL7aT7q/giphy.gif'}
-            ],
-            shoulders: [
-                {name: 'Overhead Press', reps: '6-8', sets: 3, desc: 'Ushtrimi themelor për shpatullat', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
-                {name: 'Lateral Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi i izolimit për deltamide të anës', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
-                {name: 'Front Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi për deltamide të përparme', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'},
-                {name: 'Machine Shoulder Press', reps: '10-12', sets: 3, desc: 'Në makinë për më shumë sigurie', gif: 'https://media.giphy.com/media/3o7TKRqe2ILF4GhfnO/giphy.gif'}
-            ],
-            biceps: [
-                {name: 'Barbell Curls', reps: '8-12', sets: 3, desc: 'Ushtrimi klasik për bicepsin', gif: 'https://media.giphy.com/media/3o7TKUnOBz0hgvIMjq/giphy.gif'},
-                {name: 'Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Ushtrim më fleksibël me pesha të lira', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
-                {name: 'Cable Curls', reps: '10-15', sets: 3, desc: 'Ushtrimi me tension konstante', gif: 'https://media.giphy.com/media/3o7TKTPUXo7xdEgR4Y/giphy.gif'},
-                {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Ushtrimi në stollin special për biceps', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
-            ],
-            triceps: [
-                {name: 'Triceps Dips', reps: '8-12', sets: 3, desc: 'Ushtrimi themelor për tricepsin', gif: 'https://media.giphy.com/media/3o7TKd1tD0X4ztbMi0/giphy.gif'},
-                {name: 'Skull Crushers', reps: '8-12', sets: 3, desc: 'Ushtrimi i shtesë për tricepsin', gif: 'https://media.giphy.com/media/3o7TKSQdpMXAK64pNu/giphy.gif'},
-                {name: 'Rope Pushdowns', reps: '10-15', sets: 3, desc: 'Ushtrimi i izolimit me kabllo', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
-                {name: 'Overhead Extension', reps: '10-12', sets: 3, desc: 'Ushtrimi mbi kokë për tricepsin', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
-            ],
-            abs: [
-                {name: 'Crunches', reps: '15-20', sets: 3, desc: 'Ushtrimi për barkat e sipërme', gif: 'https://media.giphy.com/media/3o7TKPF1cKHKk0eGZq/giphy.gif'},
-                {name: 'Hanging Leg Raises', reps: '12-15', sets: 3, desc: 'Ushtrimi në shufër më i vështirë për barkat', gif: 'https://media.giphy.com/media/3o7TKZ9KJM5OmBXdwY/giphy.gif'},
-                {name: 'Cable Crunches', reps: '12-15', sets: 3, desc: 'Ushtrimi me kabllo për barkat', gif: 'https://media.giphy.com/media/3o7TKWPrFdkIPZzZhm/giphy.gif'},
-                {name: 'Planks', reps: '30-60s', sets: 3, desc: 'Mbaj pozicionin për kohë të gjatë', gif: 'https://media.giphy.com/media/3o7TKMZTKfBEVVF1dq/giphy.gif'}
-            ]
+        function getExerciseVideoLink(exerciseName) {
+            const name = (exerciseName || '').toLowerCase();
+
+            if (name.includes('leg press')) {
+                return YOUTUBE_REFERENCE_SHORT;
+            }
+
+            const searchQuery = encodeURIComponent(`${exerciseName} proper form shorts`);
+            return `https://www.youtube.com/results?search_query=${searchQuery}`;
+        }
+
+        // Exercise database by level
+        const workoutPlans = {
+            fillestar: {
+                intro: 'Faza e forcimit (6 javë): Java 1-2 fokus teknikë, Java 3-4 rritje graduale peshe, Java 5-6 stabilizim dhe kontroll forme.',
+                groups: {
+                    chest: [
+                        {name: 'Machine Chest Press', reps: '12-15', sets: 3, desc: 'Më e sigurt për fillestarët për forcim bazë të gjoksit', gif: 'https://media.giphy.com/media/3o7TKMoHaErf6Psl5i/giphy.gif'},
+                        {name: 'Incline Push Ups', reps: '10-15', sets: 3, desc: 'Variant i lehtë i push-up për kontroll të mirë të trupit', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'},
+                        {name: 'Dumbbell Floor Press', reps: '10-12', sets: 3, desc: 'Lëvizje e thjeshtë me ROM të kontrolluar', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'}
+                    ],
+                    back: [
+                        {name: 'Seated Cable Row', reps: '12-15', sets: 3, desc: 'Forcon shpinën me stabilitet të lartë', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Lat Pulldowns', reps: '10-12', sets: 3, desc: 'Më i lehtë se pull-up për fillim', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Chest Supported Row', reps: '10-12', sets: 3, desc: 'Redukton ngarkesën në mes për teknikë më të mirë', gif: 'https://media.giphy.com/media/3o7TKYfwCKGnLAPERu/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Goblet Squat', reps: '10-12', sets: 3, desc: 'Variant i sigurt për mësim të squat-it', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Leg Press', reps: '12-15', sets: 3, desc: 'Forcon këmbët pa stres të madh në mes', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
+                        {name: 'Romanian Deadlift (Light DB)', reps: '10-12', sets: 3, desc: 'Forcim i posterior chain me peshë të lehtë', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Machine Shoulder Press', reps: '10-12', sets: 3, desc: 'Më i kontrolluar për fillestarë', gif: 'https://media.giphy.com/media/3o7TKRqe2ILF4GhfnO/giphy.gif'},
+                        {name: 'Lateral Raises (Light)', reps: '12-15', sets: 3, desc: 'Izolim i butë për shpatulla', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Për stabilitet të pjesës së pasme të shpatullës', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ]
+                }
+            },
+            mesatar: {
+                intro: 'Program progresiv mesatar (8 javë): fokus në compound + asistenca për rritje performance.',
+                groups: {
+                    chest: [
+                        {name: 'Dumbbell Bench Press', reps: '8-10', sets: 4, desc: 'Rrit forcën e gjoksit dhe stabilizimin', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
+                        {name: 'Incline Bench Press', reps: '8-10', sets: 3, desc: 'Fokus në pjesën e sipërme të gjoksit', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
+                        {name: 'Cable Flyes', reps: '12-15', sets: 3, desc: 'Izolim për aktivizim më të plotë', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'}
+                    ],
+                    back: [
+                        {name: 'Barbell Rows', reps: '8-10', sets: 4, desc: 'Ushtrim kryesor për trashësi të shpinës', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
+                        {name: 'Assisted Pull Ups', reps: '8-10', sets: 3, desc: 'Kalimi gradual drejt pull-up të lirë', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Balancim i shpatullave dhe posturë', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Back Squat', reps: '6-8', sets: 4, desc: 'Bazë force për këmbët', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Romanian Deadlift', reps: '8-10', sets: 3, desc: 'Fokus në posterior chain', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
+                        {name: 'Leg Curls', reps: '12-15', sets: 3, desc: 'Izolim i hamstrings', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Overhead Press', reps: '6-8', sets: 4, desc: 'Ushtrim kryesor për forcë të shpatullës', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
+                        {name: 'Lateral Raises', reps: '12-15', sets: 3, desc: 'Izolim i deltoidit lateral', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Rear Delt Fly', reps: '12-15', sets: 3, desc: 'Për pjesën e pasme të shpatullës', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'}
+                    ],
+                    biceps: [
+                        {name: 'Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Forcim bilateral i bicepsit', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
+                        {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Izolim i kontrolluar', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
+                    ],
+                    triceps: [
+                        {name: 'Rope Pushdowns', reps: '10-12', sets: 3, desc: 'Ushtrim i sigurt izolues', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
+                        {name: 'Overhead Extension', reps: '10-12', sets: 3, desc: 'Fokus në kokën e gjatë të tricepsit', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
+                    ]
+                }
+            },
+            avancuar: {
+                intro: 'Program avancuar (10-12 javë): compound të rënda + volum i lartë izolimesh për detaje muskulare.',
+                groups: {
+                    chest: [
+                        {name: 'Bench Press', reps: '5-8', sets: 5, desc: 'Compound kryesor për forcë të lartë', gif: 'https://media.tenor.com/images/e89d724a94c8f27e05add1bbd6ae2e6f/tenor.gif'},
+                        {name: 'Incline Bench Press', reps: '6-8', sets: 4, desc: 'Ngarkesë e lartë në pjesën e sipërme', gif: 'https://media.giphy.com/media/3o7TKU8RsvXHyj0TeM/giphy.gif'},
+                        {name: 'Cable Flyes', reps: '12-15', sets: 4, desc: 'Izolim për pompim dhe tension konstant', gif: 'https://media.giphy.com/media/3o7TKJkRi0IzRi8CKQ/giphy.gif'},
+                        {name: 'Push Ups (Finisher)', reps: 'AMRAP', sets: 2, desc: 'Finisher metabolik', gif: 'https://media.giphy.com/media/3o7TKYtX6QVelqLCKc/giphy.gif'}
+                    ],
+                    back: [
+                        {name: 'Weighted Pull Ups', reps: '5-8', sets: 4, desc: 'Compound vertikal për avancuar', gif: 'https://media.giphy.com/media/3o7TKZvPT5QjBbqZbO/giphy.gif'},
+                        {name: 'Barbell Rows', reps: '6-8', sets: 4, desc: 'Trashësi e shpinës me ngarkesë të lartë', gif: 'https://media.giphy.com/media/3o7TKUnC6RM2YdZPEQ/giphy.gif'},
+                        {name: 'Lat Pulldown (Close Grip)', reps: '10-12', sets: 3, desc: 'Izolim për lat dhe kontroll të ROM', gif: 'https://media.giphy.com/media/3o7TKZvS3Zu9bDKcFG/giphy.gif'},
+                        {name: 'Face Pulls', reps: '12-15', sets: 3, desc: 'Shëndet i shpatullës dhe posturë', gif: 'https://media.giphy.com/media/3o7TKRQqZakKpbICAk/giphy.gif'}
+                    ],
+                    legs: [
+                        {name: 'Back Squat', reps: '4-6', sets: 5, desc: 'Baza e forcës së këmbëve', gif: 'https://media.giphy.com/media/3o7TKYmKBwc0pjmhsQ/giphy.gif'},
+                        {name: 'Deadlift', reps: '3-5', sets: 4, desc: 'Forcë totale e trupit', gif: 'https://media.giphy.com/media/3o7TKQdWzCbr3BhIiA/giphy.gif'},
+                        {name: 'Leg Press', reps: '10-12', sets: 4, desc: 'Volum shtesë për quadriceps', gif: 'https://media.giphy.com/media/3o7TKQzTDMbwP4HT0c/giphy.gif'},
+                        {name: 'Leg Curls', reps: '12-15', sets: 4, desc: 'Izolim hamstrings', gif: 'https://media.giphy.com/media/3o7TKSjTmqU1L5PGGE/giphy.gif'},
+                        {name: 'Calf Raises', reps: '15-20', sets: 4, desc: 'Izolim i pulpave', gif: 'https://media.giphy.com/media/3o7TKXQ0EBquL7aT7q/giphy.gif'}
+                    ],
+                    shoulders: [
+                        {name: 'Overhead Press', reps: '5-8', sets: 4, desc: 'Compound kryesor për shpatulla', gif: 'https://media.giphy.com/media/3o7TKQd5o5jh7lAe5a/giphy.gif'},
+                        {name: 'Lateral Raises', reps: '12-15', sets: 4, desc: 'Izolim lateral për gjerësi', gif: 'https://media.giphy.com/media/3o7TKRdpfJeX9h8KVG/giphy.gif'},
+                        {name: 'Front Raises', reps: '12-15', sets: 3, desc: 'Izolim i deltoidit anterior', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'},
+                        {name: 'Rear Delt Fly', reps: '12-15', sets: 4, desc: 'Izolim i deltoidit posterior', gif: 'https://media.giphy.com/media/3o7TKc9tCpXRPQBkIg/giphy.gif'}
+                    ],
+                    biceps: [
+                        {name: 'Barbell Curls', reps: '8-10', sets: 4, desc: 'Ngarkesë bazë për biceps', gif: 'https://media.giphy.com/media/3o7TKUnOBz0hgvIMjq/giphy.gif'},
+                        {name: 'Incline Dumbbell Curls', reps: '10-12', sets: 3, desc: 'Shtrirje e madhe për kokën e gjatë', gif: 'https://media.giphy.com/media/3o7TKPJ1NnXnHnKcOc/giphy.gif'},
+                        {name: 'Cable Curls', reps: '12-15', sets: 3, desc: 'Izolim me tension konstant', gif: 'https://media.giphy.com/media/3o7TKTPUXo7xdEgR4Y/giphy.gif'},
+                        {name: 'Preacher Curls', reps: '10-12', sets: 3, desc: 'Izolim final për pompim', gif: 'https://media.giphy.com/media/3o7TKY9YFW2AxJaLRe/giphy.gif'}
+                    ],
+                    triceps: [
+                        {name: 'Close Grip Bench Press', reps: '6-8', sets: 4, desc: 'Compound i fortë për triceps', gif: 'https://media.giphy.com/media/3o7TKd1tD0X4ztbMi0/giphy.gif'},
+                        {name: 'Rope Pushdowns', reps: '10-12', sets: 4, desc: 'Izolim kryesor me kontroll', gif: 'https://media.giphy.com/media/3o7TKWxlR2RqDyL9EY/giphy.gif'},
+                        {name: 'Skull Crushers', reps: '8-10', sets: 3, desc: 'Izolim i rëndë', gif: 'https://media.giphy.com/media/3o7TKSQdpMXAK64pNu/giphy.gif'},
+                        {name: 'Overhead Extension', reps: '12-15', sets: 3, desc: 'Izolim për kokën e gjatë', gif: 'https://media.giphy.com/media/3o7TKaAy5l0j9xhXYY/giphy.gif'}
+                    ],
+                    abs: [
+                        {name: 'Cable Crunches', reps: '12-15', sets: 4, desc: 'Izolim i barkut me ngarkesë', gif: 'https://media.giphy.com/media/3o7TKWPrFdkIPZzZhm/giphy.gif'},
+                        {name: 'Hanging Leg Raises', reps: '10-12', sets: 4, desc: 'Forcë e barkut të poshtëm', gif: 'https://media.giphy.com/media/3o7TKZ9KJM5OmBXdwY/giphy.gif'},
+                        {name: 'Planks', reps: '45-90s', sets: 3, desc: 'Stabilitet i core', gif: 'https://media.giphy.com/media/3o7TKMZTKfBEVVF1dq/giphy.gif'}
+                    ]
+                }
+            }
         };
 
         // Load app state
@@ -1035,52 +1082,218 @@
 
         // Calculate nutrition
         function calculateNutrition(mosha, pesha, lartesia, gjinia, aktiviteti, objektivi) {
-            let BMR;
-            if (gjinia === 'mashkull') {
-                BMR = 88.362 + (13.397 * pesha) + (4.799 * lartesia) - (5.677 * mosha);
-            } else {
-                BMR = 447.593 + (9.247 * pesha) + (3.098 * lartesia) - (4.330 * mosha);
-            }
-            
+            const isMale = gjinia === 'mashkull';
+
+            // Mifflin-St Jeor (zakonisht më realist për shumicën e përdoruesve)
+            const BMR = isMale
+                ? (10 * pesha) + (6.25 * lartesia) - (5 * mosha) + 5
+                : (10 * pesha) + (6.25 * lartesia) - (5 * mosha) - 161;
+
             const AKS = {
-                'i_ulte': 1.375,
-                'lehtesisht_aktiv': 1.55,
-                'moderatisht_aktiv': 1.725,
-                'shumë_aktiv': 1.9
+                'i_ulte': 1.2,
+                'lehtesisht_aktiv': 1.375,
+                'moderatisht_aktiv': 1.5,
+                'shumë_aktiv': 1.65
             };
-            
-            const TDEE = BMR * AKS[aktiviteti];
+
+            const activityFactor = AKS[aktiviteti] || 1.375;
+            const TDEE = BMR * activityFactor;
+
             let kalori_final = TDEE;
-            
             if (objektivi === 'bulk') {
-                kalori_final = TDEE + 300;
+                kalori_final = TDEE + 200;
             } else if (objektivi === 'cut') {
-                kalori_final = TDEE - 500;
+                kalori_final = TDEE - 300;
             }
-            
-            let proteine_percent = 0.35, carbs_percent = 0.45, fat_percent = 0.20;
-            
-            if (objektivi === 'bulk') {
-                proteine_percent = 0.32;
-                carbs_percent = 0.50;
-                fat_percent = 0.18;
-            } else if (objektivi === 'cut') {
-                proteine_percent = 0.40;
-                carbs_percent = 0.35;
-                fat_percent = 0.25;
-            }
-            
+
+            // Mbrojtje minimale për të mos zbritur shumë poshtë
+            kalori_final = Math.max(kalori_final, BMR * 1.1);
+
+            // Makro më realiste sipas peshës (g/kg), jo përqindje fikse shumë të larta
+            const proteinPerKg = objektivi === 'cut' ? 2.0 : (objektivi === 'bulk' ? 1.8 : 1.7);
+            const fatPerKg = objektivi === 'cut' ? 0.8 : (objektivi === 'bulk' ? 0.9 : 0.85);
+
+            const proteine = Math.round(pesha * proteinPerKg);
+            const yndyre = Math.round(pesha * fatPerKg);
+
+            const caloriesFromProtein = proteine * 4;
+            const caloriesFromFat = yndyre * 9;
+            const remainingCalories = Math.max(kalori_final - caloriesFromProtein - caloriesFromFat, pesha * 2 * 4);
+            const karbohidrate = Math.round(remainingCalories / 4);
+
+            const totalCaloriesFromMacros = (proteine * 4) + (karbohidrate * 4) + (yndyre * 9);
+            const proteine_percent = (proteine * 4) / totalCaloriesFromMacros;
+            const carbs_percent = (karbohidrate * 4) / totalCaloriesFromMacros;
+            const fat_percent = (yndyre * 9) / totalCaloriesFromMacros;
+
             return {
                 BMR: Math.round(BMR),
                 TDEE: Math.round(TDEE),
-                kalori_final: Math.round(kalori_final),
-                proteine: Math.round((kalori_final * proteine_percent) / 4),
-                karbohidrate: Math.round((kalori_final * carbs_percent) / 4),
-                yndyre: Math.round((kalori_final * fat_percent) / 9),
+                kalori_final: Math.round(totalCaloriesFromMacros),
+                proteine,
+                karbohidrate,
+                yndyre,
                 proteine_percent: Math.round(proteine_percent * 100),
                 carbs_percent: Math.round(carbs_percent * 100),
                 fat_percent: Math.round(fat_percent * 100)
             };
+        }
+
+        function getDietTemplates(objective) {
+            if (objective === 'cut') {
+                return {
+                    note: 'Deficit i moderuar, proteinë e lartë dhe ushqime me densitet të ulët kalorik.',
+                    breakfast: [
+                        '2 vezë + {oats}g tërshërë + 1 kos i thjeshtë',
+                        'Omletë me 3 të bardha + 1 vezë + 1 fetë bukë integrale + 1 frut',
+                        '{oats}g overnight oats me kos të lehtë + manaferra'
+                    ],
+                    lunch: [
+                        '{proteinLean}g fileto pule + {riceSmall}g oriz i zier + sallatë e madhe',
+                        '{proteinLean}g ton/peshk i bardhë + {potatoSmall}g patate të pjekura + perime',
+                        '{proteinLean}g mish viçi i ligët + {riceSmall}g bulgur + sallatë'
+                    ],
+                    snack: [
+                        '1 kos proteinik + 1 mollë + {nutsSmall}g bajame',
+                        '1 shake proteine + 1 portokall',
+                        'Gjizë e lehtë + 1 frut'
+                    ],
+                    dinner: [
+                        '{proteinLean}g peshk + perime të avulluara + {potatoSmall}g patate',
+                        '{proteinLean}g pule + sallatë + 1 lugë çaji vaj ulliri',
+                        '{proteinLean}g turkey + brokoli + {riceSmall}g oriz'
+                    ]
+                };
+            }
+
+            if (objective === 'bulk') {
+                return {
+                    note: 'Surplus i kontrolluar me fokus në performance dhe rikuperim.',
+                    breakfast: [
+                        '3 vezë + {oatsHigh}g tërshërë + 1 banane + {nutsMedium}g gjalpë kikiriku',
+                        'Omletë me 3 vezë + 2 feta bukë integrale + 1 kos',
+                        '{oatsHigh}g tërshërë me qumësht + mjaltë + 1 banane'
+                    ],
+                    lunch: [
+                        '{proteinHigh}g mish pule/viçi + {riceHigh}g oriz + sallatë + 1 lugë gjelle vaj ulliri',
+                        '{proteinHigh}g salmon + {potatoHigh}g patate + perime',
+                        '{proteinHigh}g mish i ligët + {riceHigh}g makarona integrale'
+                    ],
+                    snack: [
+                        '1 shake proteine + 2 feta bukë integrale + {nutsMedium}g arra',
+                        'Kos i trashë + granola + banane',
+                        'Sanduiç integral me ton + frut'
+                    ],
+                    dinner: [
+                        '{proteinHigh}g peshk/mish i ligët + {potatoHigh}g patate ose makarona + sallatë',
+                        '{proteinHigh}g pule + {riceHigh}g oriz + perime',
+                        '{proteinHigh}g viç i ligët + quinoa + perime'
+                    ]
+                };
+            }
+
+            return {
+                note: 'Mirëmbajtje peshe me vakte të balancuara dhe energji stabile gjatë ditës.',
+                breakfast: [
+                    '2 vezë + {oats}g tërshërë + 1 frut',
+                    'Kos i trashë + tërshërë + fruta pylli',
+                    'Omletë me 2 vezë + 1 fetë bukë integrale + domate'
+                ],
+                lunch: [
+                    '{proteinMed}g pule/peshk + {riceMed}g oriz i zier + sallatë',
+                    '{proteinMed}g mish i ligët + {potatoMed}g patate + perime',
+                    '{proteinMed}g peshk + quinoa + sallatë jeshile'
+                ],
+                snack: [
+                    '1 kos + {nutsSmall}g arra/bajame + 1 frut',
+                    '1 shake proteine + 1 frut',
+                    'Gjizë + fara chia + fruta'
+                ],
+                dinner: [
+                    '{proteinMed}g mish i ligët + {potatoMed}g patate + perime të gjelbra',
+                    '{proteinMed}g peshk + oriz + sallatë',
+                    '{proteinMed}g pule + perime të pjekura + 1 lugë çaji vaj ulliri'
+                ]
+            };
+        }
+
+        function fillDietTemplate(template, portions) {
+            return template
+                .replaceAll('{oats}', portions.oats)
+                .replaceAll('{oatsHigh}', portions.oatsHigh)
+                .replaceAll('{proteinLean}', portions.proteinLean)
+                .replaceAll('{proteinMed}', portions.proteinMed)
+                .replaceAll('{proteinHigh}', portions.proteinHigh)
+                .replaceAll('{riceSmall}', portions.riceSmall)
+                .replaceAll('{riceMed}', portions.riceMed)
+                .replaceAll('{riceHigh}', portions.riceHigh)
+                .replaceAll('{potatoSmall}', portions.potatoSmall)
+                .replaceAll('{potatoMed}', portions.potatoMed)
+                .replaceAll('{potatoHigh}', portions.potatoHigh)
+                .replaceAll('{nutsSmall}', portions.nutsSmall)
+                .replaceAll('{nutsMedium}', portions.nutsMedium);
+        }
+
+        function buildWeeklyDietHTML(context, variantIndex) {
+            const { userData, surveyData, nutrition } = context;
+            const personName = userData.emri || 'Ju';
+            const objective = surveyData.objektivi || 'maintain';
+            const templates = getDietTemplates(objective);
+            const scale = Math.max(0.8, Math.min(1.35, nutrition.kalori_final / 2200));
+
+            const portions = {
+                oats: Math.round(55 * scale),
+                oatsHigh: Math.round(72 * scale),
+                proteinLean: Math.round(160 * scale),
+                proteinMed: Math.round(175 * scale),
+                proteinHigh: Math.round(205 * scale),
+                riceSmall: Math.round(115 * scale),
+                riceMed: Math.round(145 * scale),
+                riceHigh: Math.round(185 * scale),
+                potatoSmall: Math.round(130 * scale),
+                potatoMed: Math.round(165 * scale),
+                potatoHigh: Math.round(220 * scale),
+                nutsSmall: Math.round(15 * scale),
+                nutsMedium: Math.round(22 * scale)
+            };
+
+            const days = ['E Hënë', 'E Martë', 'E Mërkurë', 'E Enjte', 'E Premte', 'E Shtunë', 'E Diel'];
+            let planHTML = `
+                <div class="nutrition-detail">
+                    <h4>🍽️ Dietë Javore e Personalizuar për ${personName}</h4>
+                    <p><strong>Objektivi:</strong> ${objective}</p>
+                    <p><strong>Kalori target:</strong> ~${nutrition.kalori_final} kcal/ditë</p>
+                    <p><strong>Shënim:</strong> ${templates.note}</p>
+                    <p><strong>Ujë:</strong> 30-35 ml/kg peshë trupore/ditë</p>
+                </div>
+            `;
+
+            days.forEach((dayName, dayIndex) => {
+                const b = fillDietTemplate(templates.breakfast[(dayIndex + variantIndex) % templates.breakfast.length], portions);
+                const l = fillDietTemplate(templates.lunch[(dayIndex + variantIndex) % templates.lunch.length], portions);
+                const s = fillDietTemplate(templates.snack[(dayIndex + variantIndex) % templates.snack.length], portions);
+                const d = fillDietTemplate(templates.dinner[(dayIndex + variantIndex) % templates.dinner.length], portions);
+
+                planHTML += `
+                    <div class="nutrition-detail">
+                        <h4>📅 ${dayName}</h4>
+                        <p><strong>Mëngjes:</strong> ${b}</p>
+                        <p><strong>Drekë:</strong> ${l}</p>
+                        <p><strong>Snack:</strong> ${s}</p>
+                        <p><strong>Darkë:</strong> ${d}</p>
+                    </div>
+                `;
+            });
+
+            return planHTML;
+        }
+
+        function regenerateDietPlan() {
+            if (!currentDietContext) return;
+            currentDietVariant += 1;
+            const container = document.getElementById('weeklyDietContainer');
+            if (!container) return;
+            container.innerHTML = buildWeeklyDietHTML(currentDietContext, currentDietVariant);
         }
 
         // Display results
@@ -1149,31 +1362,47 @@
                     <p><strong>Kalori të Rekomanduara:</strong> ${nutrition.kalori_final} kalori/ditë</p>
                 </div>
             `;
+
+            currentDietContext = {
+                userData: { ...userData },
+                surveyData: { ...surveyData },
+                nutrition: { ...nutrition }
+            };
+            currentDietVariant = 0;
+
+            nutritionHTML += `
+                <div id="weeklyDietContainer">${buildWeeklyDietHTML(currentDietContext, currentDietVariant)}</div>
+                <button type="button" onclick="regenerateDietPlan()" style="margin-top: 12px;">🔁 Ndrysho Dietën Javore</button>
+            `;
             document.getElementById('nutritionResults').innerHTML = nutritionHTML;
 
             let workoutHTML = '';
             if (surveyData.shkoje_palester) {
-                const muscleGroups = {
-                    fillestar: ['chest', 'back', 'legs', 'shoulders'],
-                    mesatar: ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps'],
-                    avancuar: ['chest', 'back', 'legs', 'shoulders', 'biceps', 'triceps', 'abs']
-                };
                 const groupNames = {chest: '💪 Gjoksi', back: '🔙 Shpinda', legs: '🦵 Këmbë', shoulders: '💪 Shpatulla', biceps: '💪 Biceps', triceps: '💪 Triceps', abs: '🤐 Barkushte'};
-                
-                const groups = muscleGroups[surveyData.niveli_fitnesit] || muscleGroups.fillestar;
-                workoutHTML = `<div class="workout-item"><h4>Niveli: ${surveyData.niveli_fitnesit.charAt(0).toUpperCase() + surveyData.niveli_fitnesit.slice(1)}</h4></div>`;
-                
+
+                const levelKey = surveyData.niveli_fitnesit || 'fillestar';
+                const selectedPlan = workoutPlans[levelKey] || workoutPlans.fillestar;
+                const groups = Object.keys(selectedPlan.groups);
+
+                workoutHTML = `
+                    <div class="workout-item">
+                        <h4>Niveli: ${levelKey.charAt(0).toUpperCase() + levelKey.slice(1)}</h4>
+                        <p style="margin-top:8px; color:#555;">${selectedPlan.intro}</p>
+                    </div>
+                `;
+
                 groups.forEach(group => {
                     workoutHTML += `<div class="muscle-group-title">${groupNames[group]}</div><div class="exercise-grid">`;
-                    exercisesDatabase[group].forEach(ex => {
+                    selectedPlan.groups[group].forEach(ex => {
+                        const videoUrl = getExerciseVideoLink(ex.name);
                         workoutHTML += `
-                            <div class="exercise-card" onclick="openExerciseModal('${ex.name}', '${ex.desc}', '${ex.reps}', '${ex.sets}', '${ex.gif}')">
-                                <div class="exercise-image"><img src="${ex.gif}" alt="${ex.name}"></div>
+                            <div class="exercise-card" onclick="openExerciseModal('${ex.name}', '${ex.desc}', '${ex.reps}', '${ex.sets}', '${videoUrl}')">
                                 <div class="exercise-info">
                                     <h4>${ex.name}</h4>
                                     <p><strong>Përsëritje:</strong> ${ex.reps}</p>
                                     <p><strong>Setje:</strong> ${ex.sets}</p>
                                     <p>${ex.desc}</p>
+                                    <div class="exercise-video-box">▶ <a href="${videoUrl}" target="_blank" rel="noopener noreferrer">Click here to see how it's done</a></div>
                                 </div>
                             </div>
                         `;
@@ -1262,13 +1491,13 @@
         }
 
         // Modal functions
-        function openExerciseModal(name, desc, reps, sets, gif) {
-            document.getElementById('modalImage').src = gif;
+        function openExerciseModal(name, desc, reps, sets, videoLink) {
             document.getElementById('modalExerciseName').textContent = name;
             document.getElementById('modalExerciseName').dataset.exerciseName = name;
             document.getElementById('modalExerciseDesc').textContent = desc;
             document.getElementById('modalRecommendedReps').textContent = reps;
             document.getElementById('modalRecommendedSets').textContent = sets;
+            document.getElementById('modalExerciseVideoLink').href = videoLink || getExerciseVideoLink(name);
             
             const prev = progressHistory.filter(e => e.emri_ushtrimit === name).pop();
             if (prev) {
@@ -1372,23 +1601,26 @@
                     });
                 });
 
-                // Progress form
-                document.getElementById('logProgressForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const entry = {
-                        emri_ushtrimit: document.getElementById('exercise_name').value,
-                        setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
-                        repetisione_perfunduar: document.getElementById('reps_completed').value,
-                        pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
-                        shenime: document.getElementById('notes').value,
-                        data: new Date().toISOString()
-                    };
-                    progressHistory.push(entry);
-                    saveAppState('progress');
-                    showAlert('✓ Përparimi u regjistrua!', 'success');
-                    document.getElementById('logProgressForm').reset();
-                    displayProgress();
-                });
+                // Progress form (optional - if present)
+                const logProgressForm = document.getElementById('logProgressForm');
+                if (logProgressForm) {
+                    logProgressForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const entry = {
+                            emri_ushtrimit: document.getElementById('exercise_name').value,
+                            setje_perfunduar: parseInt(document.getElementById('sets_completed').value),
+                            repetisione_perfunduar: document.getElementById('reps_completed').value,
+                            pesha_zgjedhur: parseFloat(document.getElementById('weight_lifted').value),
+                            shenime: document.getElementById('notes').value,
+                            data: new Date().toISOString()
+                        };
+                        progressHistory.push(entry);
+                        saveAppState('progress');
+                        showAlert('✓ Përparimi u regjistrua!', 'success');
+                        logProgressForm.reset();
+                        displayProgress();
+                    });
+                }
 
                 // Tab buttons
                 document.querySelectorAll('.tab-button').forEach(btn => {
